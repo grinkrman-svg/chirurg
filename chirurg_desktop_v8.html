@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chirurg Assistant — Desktop</title>
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQ2hpcnVyZyBBc3Npc3RhbnQg4oCUIERlc2t0b3AiLCJzaG9ydF9uYW1lIjoiQ2hpcnVyZyIsImRlc2NyaXB0aW9uIjoiU3lzdGVtIGRva3VtZW50YWNqaSBtZWR5Y3puZWog4oCUIFN6cGl0YWwgQ2hvam5pY2UiLCJzdGFydF91cmwiOiIuL2NoaXJ1cmdfZGVza3RvcC5odG1sIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBkMTExNyIsInRoZW1lX2NvbG9yIjoiIzBkMTExNyIsIm9yaWVudGF0aW9uIjoibGFuZHNjYXBlIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyByeD0nMjAnIGZpbGw9JyUyMzBkMTExNycvJTNFJTNDdGV4dCB5PScuOWVtJyBmb250LXNpemU9JzgwJyUzRSVGMCU5RiU4RiVBNSUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --accent: #3b9eff;
+  --accent2: #00d4aa;
+  --danger: #ff4d6d;
+  --warning: #ffb627;
+  --success: #2ed573;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.22s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #1c2333;
+  --bg4: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --text3: #6e7681;
+  --card: #161b22;
+  --input-bg: #0d1117;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+}
+[data-theme="light"] {
+  --bg: #f4f6f9;
+  --bg2: #ffffff;
+  --bg3: #eef1f5;
+  --bg4: #e8ecf0;
+  --border: #d0d7de;
+  --text: #1a2332;
+  --text2: #57606a;
+  --text3: #8c959f;
+  --card: #ffffff;
+  --input-bg: #f9fafb;
+  --shadow: 0 8px 32px rgba(0,0,0,0.1);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 16px;
+  height: 60px;
+  box-shadow: var(--shadow-sm);
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 17px; letter-spacing: -0.3px;
+}
+.logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.logo-sub { font-size: 11px; color: var(--text3); font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; }
+.header-spacer { flex: 1; }
+.header-info {
+  font-size: 12px; color: var(--text3);
+  font-family: 'IBM Plex Mono', monospace;
+  display: flex; align-items: center; gap: 6px;
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* Theme toggle */
+.theme-toggle {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px;
+  display: flex; gap: 2px;
+  cursor: pointer;
+}
+.theme-btn {
+  background: none; border: none;
+  padding: 5px 10px; border-radius: 16px;
+  font-size: 13px; cursor: pointer;
+  color: var(--text3);
+  transition: all var(--transition);
+}
+.theme-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* ── PATIENT SEARCH BAR ── */
+.pesel-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.pesel-input-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  flex: 1; max-width: 380px;
+  transition: border-color var(--transition);
+}
+.pesel-input-wrap:focus-within { border-color: var(--accent); }
+.pesel-input-wrap span { font-size: 13px; color: var(--text3); white-space: nowrap; }
+.pesel-input-wrap input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px; width: 100%;
+}
+.btn-search {
+  background: var(--accent); color: white;
+  border: none; border-radius: var(--radius-sm);
+  padding: 9px 18px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-search:hover { background: #5baaff; transform: translateY(-1px); }
+
+/* Patient card */
+.patient-card {
+  display: none;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  flex: 1;
+  animation: slideIn .2s ease;
+}
+.patient-card.visible { display: flex; align-items: center; gap: 16px; }
+@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+.patient-name { font-weight: 600; font-size: 15px; }
+.patient-meta { font-size: 12px; color: var(--text2); display: flex; gap: 12px; margin-top: 2px; }
+.patient-tag {
+  background: var(--accent); color: white;
+  font-size: 11px; padding: 2px 8px; border-radius: 20px;
+  font-weight: 600; margin-left: auto;
+}
+.patient-history-btn {
+  background: var(--bg4); border: 1px solid var(--border);
+  color: var(--text2); border-radius: 6px;
+  padding: 5px 10px; font-size: 12px; cursor: pointer;
+  transition: all var(--transition);
+}
+.patient-history-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── TABS ── */
+.tabs-wrap {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; gap: 4px;
+  overflow-x: auto;
+}
+.tab {
+  background: none; border: none;
+  padding: 14px 20px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text3); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 7px;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-icon { font-size: 15px; }
+
+/* ── MAIN CONTENT ── */
+main { padding: 24px; max-width: 900px; margin: 0 auto; }
+
+/* ── PANELS ── */
+.panel { display: none; animation: fadeUp .25s ease; }
+.panel.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── SECTION CARDS ── */
+.section-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.section-title {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text3); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── FORM ELEMENTS ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width: 600px) {
+  .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text3);
+}
+input[type=text], input[type=date], input[type=number], select, textarea {
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  transition: border-color var(--transition);
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,158,255,0.12);
+}
+textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+select { cursor: pointer; }
+
+/* ── ICD AUTOCOMPLETE ── */
+.icd-wrap { position: relative; }
+.icd-dropdown {
+  display: none;
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--bg2);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  z-index: 200;
+  max-height: 220px; overflow-y: auto;
+}
+.icd-dropdown.open { display: block; }
+.icd-item {
+  padding: 10px 14px; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px;
+  transition: background var(--transition);
+}
+.icd-item:hover { background: var(--bg3); }
+.icd-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 600;
+  color: var(--accent); min-width: 54px;
+  background: rgba(59,158,255,0.1);
+  padding: 2px 6px; border-radius: 4px;
+}
+.icd-name { color: var(--text2); }
+
+/* ── VOICE & PHOTO BUTTONS ── */
+.input-actions { display: flex; gap: 10px; align-items: center; }
+.btn-voice {
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  padding: 9px 16px; font-size: 13px;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.btn-voice:hover { border-color: var(--accent); color: var(--accent); }
+.btn-voice.recording {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(255,77,109,0.08);
+  animation: recordPulse 1s infinite;
+}
+@keyframes recordPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,77,109,0)} 50%{box-shadow:0 0 0 6px rgba(255,77,109,0.15)} }
+.btn-photo {
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  padding: 9px 16px; font-size: 13px;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.btn-photo:hover { border-color: var(--accent2); color: var(--accent2); }
+.recording-timer {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; color: var(--danger);
+  display: none;
+}
+.recording-timer.visible { display: block; }
+
+/* Photo preview */
+.photo-previews {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;
+}
+.photo-thumb {
+  width: 72px; height: 72px;
+  border-radius: 8px; object-fit: cover;
+  border: 2px solid var(--border);
+  cursor: pointer; position: relative;
+  transition: border-color var(--transition);
+}
+.photo-thumb:hover { border-color: var(--accent); }
+.photo-remove {
+  position: absolute; top: -6px; right: -6px;
+  background: var(--danger); color: white;
+  border-radius: 50%; width: 18px; height: 18px;
+  font-size: 11px; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── TEMPLATES ── */
+.templates-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.tpl-btn {
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  color: var(--text2);
+  padding: 6px 14px; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.tpl-btn:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  background: rgba(0,212,170,0.08);
+}
+
+/* ── GENERATE BUTTON ── */
+.generate-wrap {
+  display: flex; gap: 12px; align-items: center;
+  margin-top: 8px;
+}
+.btn-generate {
+  background: linear-gradient(135deg, var(--accent), #5b5fff);
+  color: white; border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px 32px; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+  font-family: 'IBM Plex Sans', sans-serif;
+  display: flex; align-items: center; gap: 9px;
+  letter-spacing: -0.2px;
+  box-shadow: 0 4px 16px rgba(59,158,255,0.3);
+}
+.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,158,255,0.4); }
+.btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-epikryza {
+  background: var(--bg3);
+  border: 1.5px solid var(--accent2);
+  color: var(--accent2);
+  border-radius: var(--radius-sm);
+  padding: 13px 22px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+  font-family: 'IBM Plex Sans', sans-serif;
+  display: flex; align-items: center; gap: 7px;
+}
+.btn-epikryza:hover { background: rgba(0,212,170,0.1); transform: translateY(-1px); }
+
+/* ── LOADER ── */
+.loader-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.loader-overlay.visible { display: flex; }
+.loader-spinner {
+  width: 52px; height: 52px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { color: var(--text2); font-size: 14px; }
+
+/* ── RESULT PANEL ── */
+.result-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  align-items: flex-start; justify-content: center;
+  padding: 24px; overflow-y: auto;
+}
+.result-overlay.visible { display: flex; }
+.result-modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%; max-width: 760px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  animation: modalIn .3s cubic-bezier(.4,0,.2,1);
+  margin: auto;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(.96)translateY(12px)} to{opacity:1;transform:scale(1)translateY(0)} }
+.result-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.result-title { font-weight: 700; font-size: 16px; flex: 1; }
+.result-type-badge {
+  background: rgba(59,158,255,0.15);
+  color: var(--accent);
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.btn-close {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text2);
+  padding: 7px 14px; font-size: 13px; cursor: pointer;
+  transition: all var(--transition);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.btn-close:hover { border-color: var(--danger); color: var(--danger); }
+.result-body { padding: 24px; }
+.result-textarea {
+  width: 100%; min-height: 420px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px; line-height: 1.7;
+  padding: 16px; resize: vertical;
+  transition: border-color var(--transition);
+}
+.result-textarea:focus { outline: none; border-color: var(--accent); }
+.result-actions {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: center;
+}
+.btn-pdf {
+  background: var(--danger); color: white;
+  border: none; border-radius: var(--radius-sm);
+  padding: 11px 22px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+  font-family: 'IBM Plex Sans', sans-serif;
+  display: flex; align-items: center; gap: 7px;
+}
+.btn-pdf:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-docx {
+  background: #1a6fff; color: white;
+  border: none; border-radius: var(--radius-sm);
+  padding: 11px 22px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+  font-family: 'IBM Plex Sans', sans-serif;
+  display: flex; align-items: center; gap: 7px;
+}
+.btn-docx:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.result-actions .spacer { flex: 1; }
+.char-count { font-size: 12px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
+
+/* ── HISTORY MODAL ── */
+.history-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 450;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+.history-overlay.visible { display: flex; }
+.history-modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%; max-width: 640px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  animation: modalIn .3s ease;
+}
+.history-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  position: sticky; top: 0;
+  background: var(--bg2); z-index: 1;
+}
+.history-header h3 { font-size: 15px; font-weight: 700; flex: 1; }
+.history-entry {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.history-entry:hover { background: var(--bg3); }
+.history-entry-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text3);
+  margin-bottom: 4px;
+}
+.history-entry-type {
+  display: inline-block;
+  background: rgba(59,158,255,0.1); color: var(--accent);
+  font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px; margin-bottom: 6px;
+}
+.history-entry-diag { font-size: 13px; color: var(--text2); }
+.history-empty {
+  padding: 40px 24px; text-align: center;
+  color: var(--text3); font-size: 14px;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  font-size: 13px; color: var(--text);
+  box-shadow: var(--shadow);
+  z-index: 999; opacity: 0;
+  transform: translateY(10px);
+  transition: all .3s ease;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--danger); }
+.toast.info { border-left: 3px solid var(--accent); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ── VITALS ROW ── */
+.vitals-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+@media(max-width: 600px) { .vitals-row { grid-template-columns: 1fr 1fr; } }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(59,158,255,0.1); color: var(--accent);
+  font-size: 11px; font-weight: 600;
+  padding: 3px 9px; border-radius: 20px;
+}
+
+/* Small helper */
+.mt8 { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.text-muted { font-size: 12px; color: var(--text3); }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div class="loader-overlay" id="loader">
+  <div class="loader-spinner"></div>
+  <div class="loader-text" id="loaderText">Generowanie dokumentu...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-modal">
+    <div class="result-header">
+      <div>
+        <div class="result-title">Podgląd dokumentu</div>
+        <div class="text-muted mt8" id="resultMeta"></div>
+      </div>
+      <span class="result-type-badge" id="resultBadge">—</span>
+      <button class="btn-close" onclick="closeResult()">✕ Zamknij</button>
+    </div>
+    <div class="result-body">
+      <textarea class="result-textarea" id="resultText" style="min-height:60vh" placeholder="Tutaj pojawi się wygenerowany dokument..."></textarea>
+    </div>
+    <div class="result-actions">
+      <button class="btn-pdf" onclick="downloadPDF()">📄 Pobierz PDF</button>
+      <button class="btn-docx" onclick="downloadDOCX()">📝 Pobierz DOCX</button>
+      <div class="spacer"></div>
+      <span class="char-count" id="charCount">0 znaków</span>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY OVERLAY -->
+<div class="history-overlay" id="historyPatientOverlay">
+  <div class="history-modal">
+    <div class="history-header">
+      <h3 id="historyTitle">Historia wizyt</h3>
+      <button class="btn-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div id="historyContent">
+      <div class="history-empty">Brak historii dla tego pacjenta</div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🏥</div>
+    <div>
+      <div>Chirurg Assistant</div>
+      <div class="logo-sub">Oddział Chirurgii Ogólnej</div>
+    </div>
+  </div>
+  <div class="header-spacer"></div>
+  <div class="header-info">
+    <div class="status-dot"></div>
+    <span id="currentTime">—</span>
+  </div>
+  <button onclick="toggleHistory()" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;color:var(--text2);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">📋 Historia</button>
+  <div class="theme-toggle">
+    <button class="theme-btn" id="btnDark" onclick="setTheme('dark')">🌙 Ciemny</button>
+    <button class="theme-btn active" id="btnLight" onclick="setTheme('light')">☀️ Jasny</button>
+  </div>
+  <div class="theme-toggle" style="margin-left:8px">
+    <button class="theme-btn active" id="langPL" onclick="setVoiceLang('pl-PL')">🎤 PL</button>
+    <button class="theme-btn" id="langRU" onclick="setVoiceLang('ru-RU')">🎤 RU</button>
+  </div>
+
+</header>
+
+<!-- PATIENT SEARCH -->
+<div class="pesel-bar">
+  <div class="pesel-input-wrap">
+    <span>PESEL</span>
+    <input type="text" id="peselInput" placeholder="00000000000" maxlength="11"
+           oninput="onPeselInput(this.value)" onkeydown="if(event.key==='Enter')searchPatient()">
+  </div>
+  <button class="btn-search" onclick="searchPatient()">🔍 Szukaj pacjenta</button>
+  <div class="patient-card" id="patientCard">
+    <div>
+      <div class="patient-name" id="patientName">—</div>
+      <div class="patient-meta">
+        <span id="patientDob">—</span>
+        <span id="patientAge">—</span>
+        <span id="patientPesel">—</span>
+      </div>
+    </div>
+    <button class="patient-history-btn" onclick="showHistory()">📋 Historia wizyt</button>
+    <span class="patient-tag" id="patientVisits">0 wizyt</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <button class="tab active" onclick="switchTab('przyjecie',this)">
+    <span class="tab-icon">🏥</span> Przyjęcie
+  </button>
+  <button class="tab" onclick="switchTab('wypis',this)">
+    <span class="tab-icon">📄</span> Karta wypisu
+  </button>
+  <button class="tab" onclick="switchTab('ambulatorium',this)">
+    <span class="tab-icon">🩺</span> Ambulatorium
+  </button>
+  <button class="tab" onclick="switchTab('zalecenia',this)">
+    <span class="tab-icon">🏠</span> Zalecenia domowe
+  </button>
+  <button class="tab" onclick="switchTab('konsultacja',this)">
+    <span class="tab-icon">💬</span> Konsultacja
+  </button>
+</div>
+
+<main>
+
+<!-- ══════════════ PRZYJĘCIE ══════════════ -->
+<div class="panel active" id="panel-przyjecie">
+
+  <div class="section-card">
+    <div class="section-title">Dane pacjenta</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Imię i nazwisko</label>
+        <input type="text" id="p_name" placeholder="Kowalski Jan">
+      </div>
+      <div class="field">
+        <label>Data urodzenia</label>
+        <input type="date" id="p_dob">
+      </div>
+      <div class="field">
+        <label>Powód przyjęcia</label>
+        <input type="text" id="p_reason" placeholder="krwawienie z górnego odcinka...">
+      </div>
+      <div class="field">
+        <label>Tryb przyjęcia</label>
+        <select id="p_mode">
+          <option>Nagły (SOR)</option>
+          <option>Planowy</option>
+          <option>Przepustka</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Rozpoznanie (ICD-10)</div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Wpisz rozpoznanie</label>
+        <div class="icd-wrap">
+          <input type="text" id="p_diag" placeholder="np. wrzód żołądka, krwawienie..."
+                 oninput="icdSearch(this.value,'p_diag','p_icd_dropdown','p_icd_code','p_icd_name')"
+                 autocomplete="off">
+          <div class="icd-dropdown" id="p_icd_dropdown"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Kod ICD-10</label>
+        <input type="text" id="p_icd_code" placeholder="K25.4" readonly
+               style="font-family:'IBM Plex Mono',monospace; background:var(--bg3)">
+      </div>
+      <div class="field">
+        <label>Pełna nazwa</label>
+        <input type="text" id="p_icd_name" placeholder="—" readonly style="background:var(--bg3)">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Wywiad</div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Choroby przewlekłe / przebyte</label>
+        <textarea id="p_chronic" placeholder="nadciśnienie tętnicze, cukrzyca typu 2..."></textarea>
+      </div>
+      <div class="field">
+        <label>Leki przyjmowane</label>
+        <textarea id="p_meds" placeholder="Amlodypina 5mg 1x1, Metformina..."></textarea>
+      </div>
+      <div class="field">
+        <label>Uczulenia</label>
+        <textarea id="p_allergy" placeholder="penicylina, brak..."></textarea>
+      </div>
+      <div class="field">
+        <label>Nałogi</label>
+        <input type="text" id="p_habits" placeholder="papierosy, alkohol, brak">
+      </div>
+      <div class="field">
+        <label>Wywiad rodzinny</label>
+        <input type="text" id="p_family" placeholder="nieobciążony">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Parametry życiowe</div>
+    <div class="vitals-row">
+      <div class="field"><label>RR (mmHg)</label><input type="text" id="p_rr" placeholder="120/80"></div>
+      <div class="field"><label>Tętno (/min)</label><input type="number" id="p_hr" placeholder="72"></div>
+      <div class="field"><label>Temp (°C)</label><input type="text" id="p_temp" placeholder="36.6"></div>
+      <div class="field"><label>SpO2 (%)</label><input type="number" id="p_spo2" placeholder="98"></div>
+      <div class="field"><label>Masa ciała (kg)</label><input type="number" id="p_weight" placeholder="70"></div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Badanie fizykalne</div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Opis ogólny</label>
+        <textarea id="p_exam_general" placeholder="Stan ogólny dobry. Kontakt słowny prawidłowy. Świadomość jasna..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Jama brzuszna</label>
+        <textarea id="p_exam_abd" placeholder="Brzuch miękki, niebolesny, perystaltyka prawidłowa..."></textarea>
+      </div>
+      <div class="field">
+        <label>Układ krążenia</label>
+        <textarea id="p_exam_card" placeholder="Rytm serca miarowy, tony ciche..."></textarea>
+      </div>
+      <div class="field">
+        <label>Układ oddechowy</label>
+        <textarea id="p_exam_resp" placeholder="Szmer pęcherzykowy prawidłowy..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Inne uwagi / badanie per rectum</label>
+        <textarea id="p_exam_other" placeholder="badanie per rectum: stolec czarny..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Dyktowanie głosowe</div>
+    <div class="input-actions">
+      <button class="btn-voice" id="voiceBtn_przyjecie" onclick="toggleVoice('przyjecie')">
+        🎤 Nagraj dyktando
+      </button>
+      <span class="recording-timer" id="timer_przyjecie">⏱ 0:00</span>
+      <span class="text-muted">Możesz powiedzieć wszystko — AI samo wypełni pola</span>
+    </div>
+    <div class="mt12">
+      <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Transkrypcja / dodatkowe uwagi</label>
+      <textarea id="p_voice_text" class="mt8" style="width:100%;min-height:80px" placeholder="Tu pojawi się transkrypcja głosu lub wpisz ręcznie dodatkowe uwagi..."></textarea>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Zdjęcia / wyniki badań</div>
+    <div class="input-actions">
+      <select id="photoType_przyjecie" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);padding:8px 12px;font-size:13px;cursor:pointer;margin-right:8px">
+              <option value="lab">Wyniki lab</option>
+              <option value="rtg">RTG</option>
+              <option value="tk">TK</option>
+              <option value="usg">USG</option>
+              <option value="mri">MRI</option>
+              <option value="ekg">EKG</option>
+              <option value="inne">Inne zdjecie</option>
+            </select>
+            <button class="btn-photo" onclick="addPhoto('przyjecie')" style="flex:none">📷 Dodaj zdjęcie</button>
+      <span class="text-muted">Claude przeczyta wyniki i wstawi dane do dokumentu</span>
+    </div>
+    <input type="file" id="photoInput_przyjecie" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'przyjecie')">
+    <div class="photo-previews" id="previews_przyjecie"></div>
+  </div>
+
+  <div class="section-card" style="border-color: rgba(59,158,255,0.3)">
+    <div class="generate-wrap">
+      <button class="btn-queue" onclick="sendToQueue('przyjecie')" style="background:rgba(46,213,115,.12);border:1.5px solid var(--success);color:var(--success);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">📤 Do kolejki</button>
+      <button class="btn-generate" onclick="generate('przyjecie')" id="genBtn_przyjecie">
+        ✨ Generuj protokół przyjęcia
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ WYPIS ══════════════ -->
+<div class="panel" id="panel-wypis">
+
+  <div class="section-card">
+    <div class="section-title">Dane wypisowe</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Imię i nazwisko</label>
+        <input type="text" id="w_name" placeholder="Kowalski Jan">
+      </div>
+      <div class="field">
+        <label>Data przyjęcia</label>
+        <input type="date" id="w_admit">
+      </div>
+      <div class="field">
+        <label>Data wypisu</label>
+        <input type="date" id="w_discharge">
+      </div>
+      <div class="field">
+        <label>Tryb wypisu</label>
+        <select id="w_mode">
+          <option>Do domu</option>
+          <option>Na oddział rehabilitacji</option>
+          <option>Do innego szpitala</option>
+          <option>Na własne żądanie</option>
+          <option>Zgon</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Rozpoznanie końcowe (ICD-10)</div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Rozpoznanie</label>
+        <div class="icd-wrap">
+          <input type="text" id="w_diag" placeholder="np. wrzód żołądka, krwawienie..."
+                 oninput="icdSearch(this.value,'w_diag','w_icd_dropdown','w_icd_code','w_icd_name')" autocomplete="off">
+          <div class="icd-dropdown" id="w_icd_dropdown"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Kod ICD-10</label>
+        <input type="text" id="w_icd_code" placeholder="K25.4" readonly style="font-family:'IBM Plex Mono',monospace;background:var(--bg3)">
+      </div>
+      <div class="field">
+        <label>Pełna nazwa</label>
+        <input type="text" id="w_icd_name" placeholder="—" readonly style="background:var(--bg3)">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Epikryza i leczenie</div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Zastosowane leczenie</label>
+        <textarea id="w_treatment" placeholder="ECPW — protezę usunięto, drogi żółciowe sprawdzono balonem..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Szablony zaleceń</label>
+        <div class="templates-grid" id="tpl_wypis">
+          <button class="tpl-btn" onclick="applyTemplate('w_zalecenia','Kontrola lekarska w Poradni Chirurgii Ogólnej za 2 tygodnie.')">Kontrola poradnia</button>
+          <button class="tpl-btn" onclick="applyTemplate('w_zalecenia','Dieta lekkostrawna przez 4 tygodnie.')">Dieta lekkostrawna</button>
+          <button class="tpl-btn" onclick="applyTemplate('w_zalecenia','Oszczędzanie kończyny przez kule.')">Oszczędzanie kończyny</button>
+          <button class="tpl-btn" onclick="applyTemplate('w_zalecenia','Zmiana opatrunków co 2 dni.')">Zmiana opatrunków</button>
+          <button class="tpl-btn" onclick="applyTemplate('w_zalecenia','Zgłosić się na SOR w razie nasilenia dolegliwości bólowych, gorączki lub krwawienia.')">SOR w nagłości</button>
+          <button class="tpl-btn" onclick="applyTemplate('w_zalecenia','Zakaz prowadzenia pojazdów przez 24 godziny.')">Zakaz prowadzenia</button>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Zalecenia lekarskie</label>
+        <textarea id="w_zalecenia" placeholder="Kontrola lekarska w Poradni Chirurgii Ogólnej..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Leki po wypisie</label>
+        <textarea id="w_meds_out" placeholder="Atoris 20mg 0-0-1, Spironol 50mg 1-0-0..."></textarea>
+      </div>
+    </div>
+    <div class="mt12">
+      <button class="btn-epikryza" onclick="generateEpikryza()">
+        🤖 Generuj epikryzę automatycznie
+      </button>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Dyktowanie głosowe</div>
+    <div class="input-actions">
+      <button class="btn-voice" id="voiceBtn_wypis" onclick="toggleVoice('wypis')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_wypis">⏱ 0:00</span>
+    </div>
+    <div class="mt12">
+      <textarea id="w_voice_text" style="width:100%;min-height:80px" placeholder="Transkrypcja głosu lub dodatkowe uwagi..."></textarea>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Zdjęcia / wyniki</div>
+    <div class="input-actions">
+      <select id="photoType_wypis" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);padding:8px 12px;font-size:13px;cursor:pointer;margin-right:8px">
+              <option value="lab">Wyniki lab</option>
+              <option value="rtg">RTG</option>
+              <option value="tk">TK</option>
+              <option value="usg">USG</option>
+              <option value="mri">MRI</option>
+              <option value="ekg">EKG</option>
+              <option value="inne">Inne zdjecie</option>
+            </select>
+            <button class="btn-photo" onclick="addPhoto('wypis')" style="flex:none">📷 Dodaj zdjęcie</button>
+    </div>
+    <input type="file" id="photoInput_wypis" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'wypis')">
+    <div class="photo-previews" id="previews_wypis"></div>
+  </div>
+
+  <div class="section-card" style="border-color: rgba(59,158,255,0.3)">
+    <div class="generate-wrap">
+      <button class="btn-queue" onclick="sendToQueue('wypis')" style="background:rgba(46,213,115,.12);border:1.5px solid var(--success);color:var(--success);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">📤 Do kolejki</button><button class="btn-generate" onclick="generate('wypis')">✨ Generuj kartę wypisu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ AMBULATORIUM ══════════════ -->
+<div class="panel" id="panel-ambulatorium">
+
+  <div class="section-card">
+    <div class="section-title">Dane wizyty</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Imię i nazwisko</label>
+        <input type="text" id="a_name" placeholder="Kowalski Jan">
+      </div>
+      <div class="field">
+        <label>Data wizyty</label>
+        <input type="date" id="a_date">
+      </div>
+      <div class="field full">
+        <label>Powód wizyty / dolegliwości</label>
+        <textarea id="a_complaint" placeholder="Pacjent zgłasza ból w prawym podżebrzu od 3 dni..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Rozpoznanie (ICD-10)</div>
+    <div class="form-grid">
+      <div class="field full">
+        <div class="icd-wrap">
+          <input type="text" id="a_diag" placeholder="np. przepuklina pachwinowa..."
+                 oninput="icdSearch(this.value,'a_diag','a_icd_dropdown','a_icd_code','a_icd_name')" autocomplete="off">
+          <div class="icd-dropdown" id="a_icd_dropdown"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Kod ICD-10</label>
+        <input type="text" id="a_icd_code" readonly style="font-family:'IBM Plex Mono',monospace;background:var(--bg3)">
+      </div>
+      <div class="field">
+        <label>Pełna nazwa</label>
+        <input type="text" id="a_icd_name" readonly style="background:var(--bg3)">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Badanie i plan</div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Badanie przedmiotowe</label>
+        <textarea id="a_exam" placeholder="Stan ogólny dobry. Brzuch miękki..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Plan leczenia / zalecenia</label>
+        <div class="templates-grid mt8">
+          <button class="tpl-btn" onclick="applyTemplate('a_plan','Dexak 25mg 3x1 p.o. przez 5 dni.')">Dexak 5 dni</button>
+          <button class="tpl-btn" onclick="applyTemplate('a_plan','Aescin 3x2 p.o. przez 5 dni.')">Aescin 5 dni</button>
+          <button class="tpl-btn" onclick="applyTemplate('a_plan','Omeprazol 20mg 1x1 rano na czczo przez 4 tygodnie.')">Omeprazol 4tyg</button>
+          <button class="tpl-btn" onclick="applyTemplate('a_plan','Kontrola w Poradni Chirurgicznej za 4 tygodnie.')">Kontrola 4tyg</button>
+          <button class="tpl-btn" onclick="applyTemplate('a_plan','Skierowanie do szpitala celem leczenia operacyjnego.')">Skierowanie op.</button>
+          <button class="tpl-btn" onclick="applyTemplate('a_plan','Zimne okłady miejscowo. Elewacja kończyny.')">Okłady + elewacja</button>
+        </div>
+        <textarea id="a_plan" class="mt8" placeholder="Kontrola w poradni za 4 tygodnie..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Dyktowanie głosowe</div>
+    <div class="input-actions">
+      <button class="btn-voice" id="voiceBtn_ambulatorium" onclick="toggleVoice('ambulatorium')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_ambulatorium">⏱ 0:00</span>
+    </div>
+    <div class="mt12">
+      <textarea id="a_voice_text" style="width:100%;min-height:80px" placeholder="Transkrypcja głosu lub dodatkowe uwagi..."></textarea>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Zdjęcia / wyniki</div>
+    <div class="input-actions">
+      <select id="photoType_ambulatorium" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);padding:8px 12px;font-size:13px;cursor:pointer;margin-right:8px">
+              <option value="lab">Wyniki lab</option>
+              <option value="rtg">RTG</option>
+              <option value="tk">TK</option>
+              <option value="usg">USG</option>
+              <option value="mri">MRI</option>
+              <option value="ekg">EKG</option>
+              <option value="inne">Inne zdjecie</option>
+            </select>
+            <button class="btn-photo" onclick="addPhoto('ambulatorium')" style="flex:none">📷 Dodaj zdjęcie</button>
+    </div>
+    <input type="file" id="photoInput_ambulatorium" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'ambulatorium')">
+    <div class="photo-previews" id="previews_ambulatorium"></div>
+  </div>
+
+  <div class="section-card" style="border-color: rgba(59,158,255,0.3)">
+    <div class="generate-wrap">
+      <button class="btn-queue" onclick="sendToQueue('ambulatorium')" style="background:rgba(46,213,115,.12);border:1.5px solid var(--success);color:var(--success);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">📤 Do kolejki</button><button class="btn-generate" onclick="generate('ambulatorium')">✨ Generuj protokół ambulatoryjny</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ZALECENIA ══════════════ -->
+<div class="panel" id="panel-zalecenia">
+
+  <div class="section-card">
+    <div class="section-title">Dane pacjenta</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Imię i nazwisko</label>
+        <input type="text" id="z_name" placeholder="Kowalski Jan">
+      </div>
+      <div class="field">
+        <label>Rozpoznanie</label>
+        <input type="text" id="z_diag" placeholder="złamanie kości łokciowej...">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Zalecenia domowe</div>
+    <div class="templates-grid">
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','1. Oszczędzanie kończyny przez kule.\n')">Oszczędzanie kończyny</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','2. Dexak 25mg 3x1 p.o. przez 3-5 dni.\n')">Dexak</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','3. Aescin 3x2 p.o. przez 5 dni.\n')">Aescin</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','4. Diclac żel 3x miejscowo.\n')">Diclac żel</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','5. Mesopral 20mg 1x1 p.o. przez 5 dni (na czczo).\n')">Mesopral</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','6. Zimne okłady miejscowo przez pierwsze 48h.\n')">Zimne okłady</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','7. Elewacja kończyny.\n')">Elewacja</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','8. Dieta lekkostrawna przez 4 tygodnie.\n')">Dieta</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','9. Kontrola w Poradni Ortopedycznej za 10-14 dni (po wcześniejszej rejestracji).\n')">Kontrola ortopedyczna</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','10. Kontrola w Poradni Chirurgii Ogólnej za 2 tygodnie.\n')">Kontrola chirurgiczna</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','11. Zgłosić się na SOR w razie nasilenia dolegliwości, gorączki lub krwawienia.\n')">SOR w nagłości</button>
+      <button class="tpl-btn" onclick="appendTemplate('z_rec','12. Zakaz prowadzenia pojazdów przez 24 godziny.\n')">Zakaz prowadzenia</button>
+    </div>
+    <textarea id="z_rec" class="mt12" style="width:100%;min-height:160px" placeholder="Zalecenia pojawią się tutaj po wyborze szablonów lub wpisz ręcznie..."></textarea>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Leki do domu</div>
+    <textarea id="z_meds" style="width:100%;min-height:100px" placeholder="Atoris 20mg 0-0-1&#10;Spironol 50mg 1-0-0&#10;Poltixa 5mg 1-0-1..."></textarea>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Dyktowanie głosowe</div>
+    <div class="input-actions">
+      <button class="btn-voice" id="voiceBtn_zalecenia" onclick="toggleVoice('zalecenia')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_zalecenia">⏱ 0:00</span>
+    </div>
+    <div class="mt12">
+      <textarea id="z_voice_text" style="width:100%;min-height:80px" placeholder="Transkrypcja głosu..."></textarea>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Zdjęcia / wyniki</div>
+    <div class="input-actions">
+      <select id="photoType_zalecenia" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);padding:8px 12px;font-size:13px;cursor:pointer;margin-right:8px">
+              <option value="lab">Wyniki lab</option>
+              <option value="rtg">RTG</option>
+              <option value="tk">TK</option>
+              <option value="usg">USG</option>
+              <option value="mri">MRI</option>
+              <option value="ekg">EKG</option>
+              <option value="inne">Inne zdjecie</option>
+            </select>
+            <button class="btn-photo" onclick="addPhoto('zalecenia')" style="flex:none">📷 Dodaj zdjęcie</button>
+    </div>
+    <input type="file" id="photoInput_zalecenia" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'zalecenia')">
+    <div class="photo-previews" id="previews_zalecenia"></div>
+  </div>
+
+  <div class="section-card" style="border-color: rgba(59,158,255,0.3)">
+    <div class="generate-wrap">
+      <button class="btn-queue" onclick="sendToQueue('zalecenia')" style="background:rgba(46,213,115,.12);border:1.5px solid var(--success);color:var(--success);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">📤 Do kolejki</button><button class="btn-generate" onclick="generate('zalecenia')">✨ Generuj zalecenia domowe</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ KONSULTACJA ══════════════ -->
+<div class="panel" id="panel-konsultacja">
+
+  <div class="section-card">
+    <div class="section-title">Dane konsultacji</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Imię i nazwisko</label>
+        <input type="text" id="k_name" placeholder="Kulesza Bernadyna">
+      </div>
+      <div class="field">
+        <label>Data konsultacji</label>
+        <input type="date" id="k_date">
+      </div>
+      <div class="field">
+        <label>Zlecający / oddział</label>
+        <input type="text" id="k_from" placeholder="SOR — Szpitalny Oddział Ratunkowy">
+      </div>
+      <div class="field">
+        <label>Typ konsultacji</label>
+        <select id="k_type">
+          <option>Konsultacja chirurgiczna</option>
+          <option>Konsultacja pilna (CITO)</option>
+          <option>Konsultacja planowa</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Rozpoznanie (ICD-10)</div>
+    <div class="form-grid">
+      <div class="field full">
+        <div class="icd-wrap">
+          <input type="text" id="k_diag" placeholder="np. przepuklina, ból brzucha..."
+                 oninput="icdSearch(this.value,'k_diag','k_icd_dropdown','k_icd_code','k_icd_name')" autocomplete="off">
+          <div class="icd-dropdown" id="k_icd_dropdown"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Kod ICD-10</label>
+        <input type="text" id="k_icd_code" readonly style="font-family:'IBM Plex Mono',monospace;background:var(--bg3)">
+      </div>
+      <div class="field">
+        <label>Pełna nazwa</label>
+        <input type="text" id="k_icd_name" readonly style="background:var(--bg3)">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Opis konsultacji</div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Wywiad i stan pacjenta</label>
+        <textarea id="k_history" placeholder="Pacjent lat 87 skierowany z SOR z powodu bólu brzucha..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Badanie fizykalne</label>
+        <textarea id="k_exam" placeholder="Stan ogólny dobry. Brzuch miękki, tkliwy w prawym dole biodrowym..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Wnioski i zalecenia konsultanta</label>
+        <textarea id="k_conclusion" placeholder="W ocenie chirurgicznej obraz nie sugeruje stanu ostrego. Zalecam..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Dyktowanie głosowe</div>
+    <div class="input-actions">
+      <button class="btn-voice" id="voiceBtn_konsultacja" onclick="toggleVoice('konsultacja')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_konsultacja">⏱ 0:00</span>
+    </div>
+    <div class="mt12">
+      <textarea id="k_voice_text" style="width:100%;min-height:80px" placeholder="Transkrypcja głosu lub dodatkowe uwagi..."></textarea>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Zdjęcia / wyniki</div>
+    <div class="input-actions">
+      <select id="photoType_konsultacja" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);padding:8px 12px;font-size:13px;cursor:pointer;margin-right:8px">
+              <option value="lab">Wyniki lab</option>
+              <option value="rtg">RTG</option>
+              <option value="tk">TK</option>
+              <option value="usg">USG</option>
+              <option value="mri">MRI</option>
+              <option value="ekg">EKG</option>
+              <option value="inne">Inne zdjecie</option>
+            </select>
+            <button class="btn-photo" onclick="addPhoto('konsultacja')" style="flex:none">📷 Dodaj zdjęcie</button>
+    </div>
+    <input type="file" id="photoInput_konsultacja" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'konsultacja')">
+    <div class="photo-previews" id="previews_konsultacja"></div>
+  </div>
+
+  <div class="section-card" style="border-color: rgba(59,158,255,0.3)">
+    <div class="generate-wrap">
+      <div class="field-row" style="margin-bottom:12px">
+        <label class="field-label">Specjalność konsultacji</label>
+        <select id="k_specialty" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:10px 14px;font-size:14px;width:100%">
+          <option value="chirurgiczna">Chirurgiczna</option>
+          <option value="traumatologiczna">Traumatologiczna</option>
+          <option value="kardiologiczna">Kardiologiczna</option>
+          <option value="ginekologiczna">Ginekologiczna</option>
+          <option value="internistyczna">Internistyczna</option>
+          <option value="neurologiczna">Neurologiczna</option>
+          <option value="urologiczna">Urologiczna</option>
+          <option value="inna">Inna</option>
+        </select>
+      </div>
+      <button class="btn-queue" onclick="sendToQueue('konsultacja')" style="background:rgba(46,213,115,.12);border:1.5px solid var(--success);color:var(--success);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:8px">📤 Do kolejki</button><button class="btn-generate" onclick="generate('konsultacja')">✨ Generuj konsultację</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ════════════════════════════════════════
+// CONFIG — wpisz swój webhook URL z N8N
+// ════════════════════════════════════════
+const N8N_WEBHOOK = 'https://gringoportal.app.n8n.cloud/webhook/chirurg-assistant';
+
+// ════════════════════════════════════════
+// ICD-10 DATABASE (chirurgiczne + SOR)
+// ════════════════════════════════════════
+const ICD10 = [
+  {code:'K25.0',name:'Wrzód żołądka z krwawieniem, ostry'},
+  {code:'K25.4',name:'Wrzód żołądka z krwawieniem, przewlekły'},
+  {code:'K26.0',name:'Wrzód dwunastnicy z krwawieniem, ostry'},
+  {code:'K26.4',name:'Wrzód dwunastnicy z krwawieniem, przewlekły'},
+  {code:'K35.2',name:'Ostre zapalenie wyrostka robaczkowego z uogólnionym zapaleniem otrzewnej'},
+  {code:'K35.9',name:'Ostre zapalenie wyrostka robaczkowego, nieokreślone'},
+  {code:'K40.9',name:'Przepuklina pachwinowa jednostronna bez niedrożności i zgorzeli'},
+  {code:'K40.3',name:'Przepuklina pachwinowa obustronna bez niedrożności i zgorzeli'},
+  {code:'K41.9',name:'Przepuklina udowa jednostronna bez niedrożności i zgorzeli'},
+  {code:'K42.0',name:'Przepuklina pępkowa z niedrożnością'},
+  {code:'K42.9',name:'Przepuklina pępkowa bez niedrożności i zgorzeli'},
+  {code:'K43.9',name:'Przepuklina brzuszna bez niedrożności i zgorzeli'},
+  {code:'K80.0',name:'Kamica pęcherzyka żółciowego z ostrym zapaleniem pęcherzyka'},
+  {code:'K80.1',name:'Kamica pęcherzyka żółciowego z innym zapaleniem pęcherzyka żółciowego'},
+  {code:'K80.2',name:'Kamica pęcherzyka żółciowego bez zapalenia pęcherzyka żółciowego'},
+  {code:'K80.5',name:'Kamica dróg żółciowych bez zapalenia dróg żółciowych i zapalenia pęcherzyka'},
+  {code:'K81.0',name:'Ostre zapalenie pęcherzyka żółciowego'},
+  {code:'K85.9',name:'Ostre zapalenie trzustki, nieokreślone'},
+  {code:'K56.0',name:'Porażenna niedrożność jelit'},
+  {code:'K56.2',name:'Skręt jelit'},
+  {code:'K57.3',name:'Uchyłkowatość jelita grubego bez perforacji i ropnia'},
+  {code:'K60.0',name:'Ostra szczelina odbytu'},
+  {code:'K64.0',name:'Guzki krwawnicze, stopień I'},
+  {code:'K64.3',name:'Guzki krwawnicze, stopień IV z powikłaniami'},
+  {code:'K92.1',name:'Smoliste stolce — melena'},
+  {code:'K92.2',name:'Krwawienie z przewodu pokarmowego, nieokreślone'},
+  {code:'S62.0',name:'Złamanie kości łódeczkowatej ręki'},
+  {code:'S52.0',name:'Złamanie nasady górnej kości łokciowej'},
+  {code:'S52.5',name:'Złamanie nasady dolnej kości promieniowej'},
+  {code:'S82.0',name:'Złamanie rzepki'},
+  {code:'S82.2',name:'Złamanie trzonu piszczeli'},
+  {code:'S93.4',name:'Skręcenie stawu skokowego'},
+  {code:'S90.0',name:'Stłuczenie stawu skokowego'},
+  {code:'T14.0',name:'Rana powierzchowna okolicy ciała nieokreślonej'},
+  {code:'L02.0',name:'Ropień skóry, czyraczność i czyraczność mnoga twarzy'},
+  {code:'L02.9',name:'Ropień skóry, czyraczność i czyraczność mnoga, okolica nieokreślona'},
+  {code:'I83.9',name:'Żylaki kończyn dolnych bez owrzodzenia i zapalenia'},
+  {code:'I84.9',name:'Guzki krwawnicze, nieokreślone'},
+  {code:'C18.9',name:'Nowotwór złośliwy okrężnicy, nieokreślone'},
+  {code:'C20',  name:'Nowotwór złośliwy odbytnicy'},
+  {code:'C22.0',name:'Rak wątrobowokomórkowy'},
+  {code:'C25.9',name:'Nowotwór złośliwy trzustki, nieokreślone'},
+  {code:'R10.0',name:'Ostry brzuch'},
+  {code:'R10.4',name:'Inne i nieokreślone bóle brzucha'},
+  {code:'R57.9',name:'Wstrząs, nieokreślony'},
+  {code:'A09.9',name:'Zapalenie żołądka i jelit, nieokreślone'},
+  {code:'J18.9',name:'Zapalenie płuc, nieokreślone'},
+  {code:'I10',  name:'Nadciśnienie tętnicze pierwotne'},
+  {code:'E11.9',name:'Cukrzyca insulinoniezależna bez powikłań'},
+  {code:'Z96.6',name:'Obecność implantów ortopedycznych stawów'},
+];
+
+// ════════════════════════════════════════
+// THEME
+// ════════════════════════════════════════
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('btnDark').classList.toggle('active', t==='dark');
+  document.getElementById('btnLight').classList.toggle('active', t==='light');
+  localStorage.setItem('chirurg_theme', t);
+}
+(function() {
+  const saved = localStorage.getItem('chirurg_theme') || 'dark';
+  setTheme(saved);
+})();
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('currentTime').textContent =
+    now.toLocaleDateString('pl-PL') + ' ' +
+    now.toLocaleTimeString('pl-PL', {hour:'2-digit',minute:'2-digit'});
+}
+updateClock(); setInterval(updateClock, 10000);
+
+// ════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+// ════════════════════════════════════════
+// ICD-10 AUTOCOMPLETE
+// ════════════════════════════════════════
+let icdTimeout;
+function icdSearch(val, inputId, dropdownId, codeId, nameId) {
+  clearTimeout(icdTimeout);
+  const dd = document.getElementById(dropdownId);
+  if (!val || val.length < 2) { dd.classList.remove('open'); return; }
+  icdTimeout = setTimeout(() => {
+    const q = val.toLowerCase();
+    const results = ICD10.filter(i =>
+      i.code.toLowerCase().includes(q) || i.name.toLowerCase().includes(q)
+    ).slice(0, 8);
+    if (!results.length) { dd.classList.remove('open'); return; }
+    dd.innerHTML = results.map(i =>
+      `<div class="icd-item" onclick="selectIcd('${i.code}','${i.name.replace(/'/g,"\\'")}','${inputId}','${dropdownId}','${codeId}','${nameId}')">
+        <span class="icd-code">${i.code}</span>
+        <span class="icd-name">${i.name}</span>
+      </div>`
+    ).join('');
+    dd.classList.add('open');
+  }, 200);
+}
+function selectIcd(code, name, inputId, dropdownId, codeId, nameId) {
+  document.getElementById(inputId).value = name;
+  document.getElementById(codeId).value = code;
+  document.getElementById(nameId).value = name;
+  document.getElementById(dropdownId).classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.icd-wrap')) {
+    document.querySelectorAll('.icd-dropdown').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// ════════════════════════════════════════
+// VOICE RECORDING — Web Speech API
+// Бесплатно, без ключей, польский + русский
+// Работает в Chrome и Edge
+// ════════════════════════════════════════
+
+// Язык диктовки — переключатель в шапке
+let voiceLang = 'pl-PL';
+
+function setVoiceLang(lang) {
+  voiceLang = lang;
+  document.getElementById('langPL').classList.toggle('active', lang === 'pl-PL');
+  document.getElementById('langRU').classList.toggle('active', lang === 'ru-RU');
+  showToast(lang === 'pl-PL' ? 'Język: Polski' : 'Язык: Русский', 'info');
+}
+
+const recState = {};
+
+function toggleVoice(tab) {
+  if (recState[tab]?.active) {
+    stopSpeech(tab);
+  } else {
+    startSpeech(tab);
+  }
+}
+
+function startSpeech(tab) {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Web Speech API не поддерживается. Используйте Chrome или Edge.', 'error');
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SR();
+  recognition.lang = voiceLang;
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  const fieldMap = {
+    przyjecie:'p_voice_text', wypis:'w_voice_text',
+    ambulatorium:'a_voice_text', zalecenia:'z_voice_text', konsultacja:'k_voice_text'
+  };
+  const targetField = document.getElementById(fieldMap[tab]);
+  let finalTranscript = targetField?.value || '';
+  let interimTranscript = '';
+
+  recognition.onstart = () => {
+    recState[tab] = { active: true, recognition, startTime: Date.now() };
+    const btn = document.getElementById('voiceBtn_'+tab);
+    btn.classList.add('recording');
+    btn.innerHTML = '⏹ Stop nagrywania';
+    const timerEl = document.getElementById('timer_'+tab);
+    timerEl.classList.add('visible');
+    recState[tab].timerInterval = setInterval(() => {
+      const s = Math.floor((Date.now()-recState[tab].startTime)/1000);
+      timerEl.textContent = `⏱ ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    }, 1000);
+  };
+
+  recognition.onresult = (event) => {
+    interimTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript + ' ';
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+    if (targetField) {
+      targetField.value = finalTranscript + (interimTranscript ? '[ ' + interimTranscript + ' ]' : '');
+    }
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error !== 'aborted') showToast('Błąd mikrofonu: ' + e.error, 'error');
+    stopSpeech(tab);
+  };
+
+  recognition.onend = () => {
+    if (recState[tab]?.active) {
+      // Auto-restart if still active (Chrome cuts off after ~60s)
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+
+  recognition.start();
+}
+
+function stopSpeech(tab) {
+  if (!recState[tab]?.active) return;
+  recState[tab].recognition?.stop();
+  recState[tab].active = false;
+  clearInterval(recState[tab].timerInterval);
+  const btn = document.getElementById('voiceBtn_'+tab);
+  btn.classList.remove('recording');
+  btn.innerHTML = '🎤 Nagraj dyktando';
+  document.getElementById('timer_'+tab).classList.remove('visible');
+  showToast('Transkrypcja gotowa ✓', 'success');
+}
+
+// ════════════════════════════════════════
+// PHOTO
+// ════════════════════════════════════════
+const photoStore = {};
+function addPhoto(tab) {
+  document.getElementById('photoInput_'+tab).click();
+}
+function previewPhotos(input, tab) {
+  if (!photoStore[tab]) photoStore[tab] = [];
+  const container = document.getElementById('previews_'+tab);
+  const pType = document.getElementById('photoType_'+tab)?.value || 'inne';
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      photoStore[tab].push({name: file.name, data: e.target.result, type: pType});
+      const wrap = document.createElement('div');
+      wrap.style.position = 'relative'; wrap.style.display = 'inline-block';
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'photo-thumb';
+      const idx = photoStore[tab].length - 1;
+      const del = document.createElement('button');
+      del.className = 'photo-remove';
+      del.textContent = '×';
+      del.onclick = () => { photoStore[tab].splice(idx,1); wrap.remove(); };
+      wrap.appendChild(img); wrap.appendChild(del);
+      container.appendChild(wrap);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+// ════════════════════════════════════════
+// TEMPLATES
+// ════════════════════════════════════════
+function applyTemplate(fieldId, text) {
+  const el = document.getElementById(fieldId);
+  if (el) el.value = text;
+}
+function appendTemplate(fieldId, text) {
+  const el = document.getElementById(fieldId);
+  if (el) el.value += text;
+}
+
+// ════════════════════════════════════════
+// PATIENT SEARCH
+// ════════════════════════════════════════
+let currentPatient = null;
+function onPeselInput(val) {
+  if (val.length === 11) searchPatient();
+}
+async function searchPatient() {
+  const pesel = document.getElementById('peselInput').value.trim();
+  if (pesel.length !== 11) { showToast('PESEL musi mieć 11 cyfr', 'error'); return; }
+  showLoader('Szukam pacjenta w bazie...');
+  try {
+    const r = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'search_patient', pesel})
+    });
+    const data = await r.json();
+    hideLoader();
+    if (data.found) {
+      currentPatient = data;
+      const card = document.getElementById('patientCard');
+      card.classList.add('visible');
+      document.getElementById('patientName').textContent = data.name || '—';
+      document.getElementById('patientDob').textContent = data.dob || '—';
+      document.getElementById('patientAge').textContent = data.age ? data.age+' lat' : '—';
+      document.getElementById('patientPesel').textContent = pesel;
+      document.getElementById('patientVisits').textContent = (data.visits||0)+' wizyt';
+      autofillName(data.name);
+      showToast('Pacjent znaleziony: '+data.name, 'success');
+    } else {
+      showToast('Pacjent nie znaleziony w bazie — nowy pacjent', 'info');
+      document.getElementById('patientCard').classList.remove('visible');
+      currentPatient = null;
+    }
+  } catch(e) {
+    hideLoader();
+    showToast('Błąd połączenia z bazą', 'error');
+  }
+}
+function autofillName(name) {
+  ['p_name','w_name','a_name','z_name','k_name'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.value) el.value = name;
+  });
+}
+function showHistory() {
+  if (!currentPatient?.history?.length) {
+    document.getElementById('historyContent').innerHTML =
+      '<div class="history-empty">Brak historii wizyt dla tego pacjenta</div>';
+  } else {
+    document.getElementById('historyTitle').textContent =
+      'Historia wizyt — '+currentPatient.name;
+    document.getElementById('historyContent').innerHTML =
+      currentPatient.history.map(h => `
+        <div class="history-entry">
+          <div class="history-entry-date">${h.date}</div>
+          <span class="history-entry-type">${h.type}</span>
+          <div class="history-entry-diag">${h.diagnosis}</div>
+        </div>`).join('');
+  }
+  document.getElementById('historyPatientOverlay').classList.add('visible');
+}
+function closeHistory() {
+  document.getElementById('historyPatientOverlay').classList.remove('visible');
+}
+
+// ════════════════════════════════════════
+// GENERATE DOCUMENT
+// ════════════════════════════════════════
+const tabNames = {
+  przyjecie: 'Protokół przyjęcia',
+  wypis: 'Karta wypisu',
+  ambulatorium: 'Protokół ambulatoryjny',
+  zalecenia: 'Zalecenia domowe',
+  konsultacja: 'Konsultacja chirurgiczna'
+};
+
+function collectData(tab) {
+  const get = id => { const el=document.getElementById(id); return el?el.value:''; };
+  const maps = {
+    przyjecie: {
+      name:get('p_name'), dob:get('p_dob'), reason:get('p_reason'),
+      mode:get('p_mode'), diagnosis:get('p_diag'), icd_code:get('p_icd_code'),
+      icd_name:get('p_icd_name'), chronic:get('p_chronic'), meds:get('p_meds'),
+      allergy:get('p_allergy'), habits:get('p_habits'), family:get('p_family'),
+      rr:get('p_rr'), hr:get('p_hr'), temp:get('p_temp'), spo2:get('p_spo2'),
+      weight:get('p_weight'), exam_general:get('p_exam_general'),
+      exam_abd:get('p_exam_abd'), exam_card:get('p_exam_card'),
+      exam_resp:get('p_exam_resp'), exam_other:get('p_exam_other'),
+      voice_text:get('p_voice_text')
+    },
+    wypis: {
+      name:get('w_name'), admit:get('w_admit'), discharge:get('w_discharge'),
+      mode:get('w_mode'), diagnosis:get('w_diag'), icd_code:get('w_icd_code'),
+      icd_name:get('w_icd_name'), treatment:get('w_treatment'),
+      zalecenia:get('w_zalecenia'), meds_out:get('w_meds_out'),
+      voice_text:get('w_voice_text')
+    },
+    ambulatorium: {
+      name:get('a_name'), date:get('a_date'), complaint:get('a_complaint'),
+      diagnosis:get('a_diag'), icd_code:get('a_icd_code'), icd_name:get('a_icd_name'),
+      exam:get('a_exam'), plan:get('a_plan'), voice_text:get('a_voice_text')
+    },
+    zalecenia: {
+      name:get('z_name'), diagnosis:get('z_diag'),
+      recommendations:get('z_rec'), meds:get('z_meds'), voice_text:get('z_voice_text')
+    },
+    konsultacja: {
+      name:get('k_name'), date:get('k_date'), from:get('k_from'),
+      type:get('k_type'), diagnosis:get('k_diag'), icd_code:get('k_icd_code'),
+      icd_name:get('k_icd_name'), history:get('k_history'),
+      exam:get('k_exam'), conclusion:get('k_conclusion'), voice_text:get('k_voice_text')
+    }
+  };
+  return maps[tab] || {};
+}
+
+async function generate(tab) {
+  const data = collectData(tab);
+  const photoObjects = (photoStore[tab] || []).map(p => ({data: p.data, type: p.type || 'inne'}));
+  const specialty = tab === 'konsultacja'
+    ? (document.getElementById('k_specialty')?.value || 'chirurgiczna')
+    : 'chirurgiczna';
+  const payload = {
+    action: 'generate_document',
+    tab, document_type: tabNames[tab],
+    patient_pesel: document.getElementById('peselInput').value,
+    data, photos: photoObjects, specialty,
+    doctor: 'Grynko Roman (nr prawa: 4030783)'
+  };
+  showLoader('Generowanie dokumentu przez Claude AI...');
+  try {
+    const r = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+      signal:(()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),120000);return ac.signal;})()
+    });
+    const res = await r.json();
+    hideLoader();
+    if (res.success && res.document) {
+      showResult(res.document, tab);
+      if (res.save_status) showToast('Wizyta zapisana w historii pacjenta ✓', 'success');
+    } else {
+      showToast(res.error || 'Błąd generowania', 'error');
+    }
+  } catch(e) {
+    hideLoader();
+    showToast('Błąd połączenia z N8N: '+e.message, 'error');
+  }
+}
+
+
+// ════════════════════════════════════════
+// SEND TO QUEUE
+// ════════════════════════════════════════
+async function sendToQueue(tab) {
+  const data = collectData(tab);
+  const photoObjects = (photoStore[tab] || []).map(p => ({data: p.data, type: p.type || 'inne'}));
+  const specialty = tab === 'konsultacja'
+    ? (document.getElementById('k_specialty')?.value || 'chirurgiczna')
+    : 'chirurgiczna';
+  const name = data.name || 'Pacjent';
+  const pesel = document.getElementById('peselInput').value || '';
+  showLoader('Dodawanie do kolejki...');
+  try {
+    const r = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action: 'save_patient',
+        tab, specialty, data, photos: photoObjects,
+        patient_pesel: pesel,
+        doctor: 'Grynko Roman (nr prawa: 4030783)'
+      }),
+      signal:(()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),30000);return ac.signal;})()
+    });
+    const res = await r.json();
+    hideLoader();
+    if (res.success) {
+      showToast('Pacjent ' + name + ' dodany do kolejki ✓', 'success');
+      pollQueue();
+    } else {
+      showToast(res.error || 'Błąd dodawania do kolejki', 'error');
+    }
+  } catch(e) {
+    hideLoader();
+    showToast('Błąd: ' + e.message, 'error');
+  }
+}
+
+// ════════════════════════════════════════
+// EPIKRYZA AUTO
+// ════════════════════════════════════════
+async function generateEpikryza() {
+  const przyjData = collectData('przyjecie');
+  const wypisData = collectData('wypis');
+  showLoader('Generowanie epikryzy...');
+  try {
+    const r = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action: 'generate_epikryza',
+        przyjecie: przyjData, wypis: wypisData,
+        doctor: 'Grynko Roman (nr prawa: 4030783)'
+      }),
+      signal:(()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),120000);return ac.signal;})()
+    });
+    const res = await r.json();
+    hideLoader();
+    if (res.epikryza) {
+      document.getElementById('w_treatment').value = res.epikryza;
+      showToast('Epikryza wygenerowana ✓', 'success');
+    }
+  } catch(e) {
+    hideLoader();
+    showToast('Błąd generowania epikryzy', 'error');
+  }
+}
+
+// ════════════════════════════════════════
+// RESULT PANEL
+// ════════════════════════════════════════
+let currentDocType = '';
+function showResult(text, tab) {
+  currentDocType = tab;
+  document.getElementById('resultText').value = text;
+  document.getElementById('resultBadge').textContent = tabNames[tab];
+  document.getElementById('resultMeta').textContent =
+    new Date().toLocaleString('pl-PL') + ' · ' +
+    (document.getElementById('peselInput').value || 'brak PESEL');
+  updateCharCount();
+  document.getElementById('resultOverlay').classList.add('visible');
+}
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('visible');
+}
+function updateCharCount() {
+  const len = document.getElementById('resultText').value.length;
+  document.getElementById('charCount').textContent = len.toLocaleString('pl-PL')+' znaków';
+}
+document.getElementById('resultText').addEventListener('input', updateCharCount);
+
+// ════════════════════════════════════════
+// PDF DOWNLOAD
+// ════════════════════════════════════════
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const text = document.getElementById('resultText').value;
+  const title = tabNames[currentDocType] || 'Dokument';
+  const today = new Date().toLocaleDateString('pl-PL');
+
+  // Header
+  doc.setFillColor(59, 158, 255);
+  doc.rect(0, 0, 210, 18, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('ODDZIAŁ CHIRURGII OGÓLNEJ', 15, 8);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Grynko Roman • nr prawa: 4030783', 15, 13);
+  doc.setTextColor(255,255,255);
+  doc.text(today, 195, 11, {align:'right'});
+
+  // Title
+  doc.setTextColor(30,50,80);
+  doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(title.toUpperCase(), 105, 28, {align:'center'});
+  doc.setDrawColor(59,158,255);
+  doc.setLineWidth(0.5);
+  doc.line(15, 31, 195, 31);
+
+  // Body
+  doc.setTextColor(30,30,30);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  const lines = doc.splitTextToSize(text, 175);
+  let y = 38;
+  lines.forEach(line => {
+    if (y > 275) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.text(line, 15, y);
+    y += 5.5;
+  });
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i=1; i<=pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8); doc.setTextColor(150,150,150);
+    doc.text(`Strona ${i} z ${pageCount}`, 195, 290, {align:'right'});
+    
+  }
+
+  const name = (document.getElementById('p_name')?.value ||
+                document.getElementById('w_name')?.value || 'pacjent').replace(/\s/g,'_');
+  doc.save(`${currentDocType}_${name}_${today.replace(/\./g,'-')}.pdf`);
+  showToast('PDF pobrany ✓', 'success');
+}
+
+// ════════════════════════════════════════
+// DOCX DOWNLOAD (simple RTF-based)
+// ════════════════════════════════════════
+function downloadDOCX() {
+  const text = document.getElementById('resultText').value;
+  const title = tabNames[currentDocType] || 'Dokument';
+  const today = new Date().toLocaleDateString('pl-PL');
+  const name = (document.getElementById('p_name')?.value ||
+                document.getElementById('w_name')?.value || 'pacjent').replace(/\s/g,'_');
+  const htmlDoc = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><title>${title}</title>
+<style>
+  @page { size:A4; margin:2.5cm; }
+  body { font-family:'Times New Roman',serif; font-size:12pt; line-height:1.6; color:#000; }
+  .hdr { border-bottom:2px solid #3b9eff; padding-bottom:8px; margin-bottom:16px; }
+  .hdr-top { font-size:13pt; font-weight:bold; }
+  .hdr-sub { font-size:10pt; color:#555; margin-top:3px; }
+  .hdr-date { float:right; font-size:10pt; }
+  h2 { font-size:14pt; text-align:center; margin:16px 0; }
+  pre { font-family:'Times New Roman',serif; white-space:pre-wrap; font-size:11pt; line-height:1.7; }
+  .ftr { border-top:1px solid #ccc; margin-top:24px; padding-top:8px; font-size:9pt; color:#999; text-align:center; }
+</style></head><body>
+<div class="hdr">
+  <span class="hdr-date">${today}</span>
+  <div class="hdr-top">ODDZIA&#321; CHIRURGII OG&Oacute;LNEJ</div>
+  <div class="hdr-sub">Grynko Roman &bull; nr prawa: 4030783</div>
+</div>
+<h2>${title.toUpperCase()}</h2>
+<pre>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+
+</body></html>`;
+  const blob = new Blob(['\ufeff'+htmlDoc], {type:'application/msword;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${currentDocType}_${name}_${today.replace(/\./g,'-')}.doc`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('DOCX pobrany ✓', 'success');
+}
+
+// ════════════════════════════════════════
+// LOADER & TOAST
+// ════════════════════════════════════════
+function showLoader(msg) {
+  document.getElementById('loaderText').textContent = msg || 'Proszę czekać...';
+  document.getElementById('loader').classList.add('visible');
+}
+function hideLoader() {
+  document.getElementById('loader').classList.remove('visible');
+}
+let toastTimeout;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = (type==='success'?'✓ ':type==='error'?'✕ ':'ℹ ') + msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { t.classList.remove('show'); }, 3500);
+}
+
+// Set today's date in date fields
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  ['a_date','k_date','w_discharge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = today;
+  });
+});
+</script>
+
+<!-- ══ RADIO PLAYER ══ -->
+<div id="radioPlayer" style="position:fixed;bottom:24px;left:24px;z-index:300;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);min-width:240px;font-family:'IBM Plex Sans',sans-serif">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Radio PL</span>
+    <div id="radioIndicator" style="width:7px;height:7px;border-radius:50%;background:var(--border);margin-left:auto;transition:all .3s"></div>
+    <button onclick="document.getElementById('radioBody').style.display=document.getElementById('radioBody').style.display==='none'?'block':'none'" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0">⌄</button>
+  </div>
+  <div id="radioBody">
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
+      <button class="radio-btn" onclick="playStation(0)">RMF FM</button>
+      <button class="radio-btn" onclick="playStation(1)">Radio ZET</button>
+      <button class="radio-btn" onclick="playStation(2)">Polskie Radio 1</button>
+      <button class="radio-btn" onclick="playStation(3)">Radio ESKA</button>
+      <button class="radio-btn" onclick="playStation(4)">Chillizet</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--text3)">Vol</span>
+      <input type="range" id="radioVol" min="0" max="1" step="0.05" value="0.4" oninput="if(radioAudio)radioAudio.volume=this.value" style="flex:1;accent-color:var(--accent)">
+    </div>
+    <div id="radioNow" style="font-size:11px;color:var(--text3);margin-top:5px;text-align:center">Wybierz stację</div>
+  </div>
+</div>
+
+<!-- ══ QUEUE PANEL ══ -->
+<div id="queuePanel" style="position:fixed;top:70px;right:24px;z-index:300;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);width:230px;font-family:'IBM Plex Sans',sans-serif">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Kolejka</span>
+    <button onclick="pollQueue()" title="Odśwież kolejkę" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text3);cursor:pointer;font-size:12px;padding:3px 8px;margin-left:4px">↻</button>
+    <div id="queueDot" style="width:7px;height:7px;border-radius:50%;background:var(--border);margin-left:auto;transition:all .3s"></div>
+    <button onclick="document.getElementById('queueBody').style.display=document.getElementById('queueBody').style.display==='none'?'block':'none'" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0">⌄</button>
+  </div>
+  <div id="queueBody">
+    <div id="queueList" style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0">Brak pacjentów</div>
+  </div>
+</div>
+
+<style>
+.radio-btn{background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;color:var(--text2);padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;text-align:left;font-family:'IBM Plex Sans',sans-serif;width:100%}
+.radio-btn:hover{border-color:var(--accent);color:var(--accent)}
+.radio-btn.playing{border-color:var(--success);color:var(--success);background:rgba(46,213,115,.08)}
+.queue-item{padding:7px 10px;border-radius:8px;border:1px solid var(--border);margin-bottom:5px;cursor:pointer;transition:all .2s;font-size:12px}
+.queue-item:hover{border-color:var(--accent);background:var(--bg3)}
+</style>
+
+<script>
+// ── RADIO ──────────────────────────────────────────
+const STATIONS=[
+  {name:'RMF FM',url:'https://rs101-krk.rmfstream.pl/RMFFM48'},
+  {name:'Radio ZET',url:'https://n-22-17.dcs.redcdn.pl/sc/o2/Eurozet/live/audio.livx?audio=5'},
+  {name:'Polskie Radio 1',url:'https://stream.polskieradio.pl/pr1/pr1.mp3'},
+  {name:'Radio ESKA',url:'https://n-22-17.dcs.redcdn.pl/sc/o2/Eurozet/live/eska.livx'},
+  {name:'Chillizet',url:'https://n-22-17.dcs.redcdn.pl/sc/o2/Eurozet/live/chillizet.livx'}
+];
+let radioAudio=null, currentStation=-1;
+function playStation(idx){
+  document.querySelectorAll('.radio-btn').forEach((b,i)=>b.classList.toggle('playing',i===idx));
+  if(currentStation===idx){if(radioAudio){radioAudio.pause();radioAudio.src='';radioAudio=null;}currentStation=-1;document.getElementById('radioIndicator').style.background='var(--border)';document.getElementById('radioIndicator').style.boxShadow='none';document.getElementById('radioNow').textContent='Wybierz stację';return;}
+  if(radioAudio){radioAudio.pause();radioAudio.src='';}
+  radioAudio=new Audio(STATIONS[idx].url);
+  radioAudio.volume=parseFloat(document.getElementById('radioVol').value);
+  radioAudio.play().catch(()=>showToast('Błąd stacji','error'));
+  currentStation=idx;
+  document.getElementById('radioIndicator').style.background='var(--success)';
+  document.getElementById('radioIndicator').style.boxShadow='0 0 6px var(--success)';
+  document.getElementById('radioNow').textContent='▶ '+STATIONS[idx].name;
+}
+
+// ── QUEUE ──────────────────────────────────────────
+async function pollQueue(){
+  try{
+    const r=await fetch(N8N_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'get_queue'})});
+    const res=await r.json();
+    if(res.success)renderQueue(res.queue||[]);
+  }catch(e){}
+}
+function renderQueue(queue){
+  const dot=document.getElementById('queueDot');
+  const list=document.getElementById('queueList');
+  if(!queue.length){dot.style.background='var(--border)';dot.style.boxShadow='none';list.innerHTML='<div style="text-align:center;color:var(--text3);padding:8px 0;font-size:12px">Brak pacjentów</div>';return;}
+  dot.style.background='var(--warning)';dot.style.boxShadow='0 0 6px var(--warning)';
+  list.innerHTML=queue.map(p=>`<div class="queue-item" onclick="loadFromQueue(${p.num})"><span style="font-family:monospace;color:var(--accent);font-weight:700">#${p.num}</span> ${p.label.replace('#'+p.num+' — ','')||'—'} <span style="float:right;color:var(--text3)">${p.time}</span></div>`).join('');
+}
+async function loadFromQueue(num){
+  showLoader('Ładowanie z kolejki...');
+  try{
+    const r=await fetch(N8N_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'get_patient',num})});
+    const res=await r.json();
+    hideLoader();
+    if(!res.success){showToast(res.error||'Błąd','error');return;}
+    const d=res.data||{};
+    const tab=res.tab||'przyjecie';
+    document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick')?.includes(tab))t.click();});
+    const vtMap={przyjecie:'p_voice_text',wypis:'w_voice_text',ambulatorium:'a_voice_text',zalecenia:'z_voice_text',konsultacja:'k_voice_text'};
+    if(vtMap[tab]&&res.voice_text)document.getElementById(vtMap[tab]).value=res.voice_text;
+    showToast('Pacjent #'+num+' załadowany ✓','success');
+    pollQueue();
+  }catch(e){hideLoader();showToast('Błąd: '+e.message,'error');}
+}
+pollQueue(); // initial load only
+
+// ── PWA ──────────────────────────────────────────
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+
+
+<!-- ══ HISTORIA PANEL ══ -->
+<div id="historyPanel" style="
+  position:fixed; top:0; right:-360px; bottom:0; z-index:400;
+  width:360px; background:var(--bg2);
+  border-left:1px solid var(--border);
+  box-shadow:-4px 0 24px rgba(0,0,0,.4);
+  display:flex; flex-direction:column;
+  transition:right .3s ease;
+  font-family:'IBM Plex Sans',sans-serif;
+">
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <span style="font-weight:700;font-size:14px;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Historia dokumentów</span>
+    <button onclick="toggleHistory()" style="margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0">×</button>
+  </div>
+  <div style="padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
+    <button onclick="loadHistory()" style="background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;color:var(--text2);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;width:100%">↻ Odśwież historię</button>
+  </div>
+  <div id="historyList" style="flex:1;overflow-y:auto;padding:10px 12px">
+    <div style="text-align:center;color:var(--text3);font-size:12px;padding:20px 0">Naciśnij "Odśwież historię"</div>
+  </div>
+</div>
+<div id="historyOverlay" onclick="toggleHistory()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:399"></div>
+
+<style>
+.hist-item {
+  padding:10px 12px; border-radius:10px;
+  border:1px solid var(--border);
+  margin-bottom:8px; cursor:pointer;
+  transition:all .2s; background:var(--bg3);
+}
+.hist-item:hover { border-color:var(--accent); background:var(--bg2); }
+.hist-item-type { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; }
+.hist-item-name { font-size:13px; font-weight:600; color:var(--text); margin-top:3px; }
+.hist-item-time { font-size:11px; color:var(--text3); margin-top:2px; }
+</style>
+
+<script>
+// ── HISTORY ────────────────────────────────────────
+let historyOpen = false;
+
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('historyPanel').style.right = historyOpen ? '0' : '-360px';
+  document.getElementById('historyOverlay').style.display = historyOpen ? 'block' : 'none';
+  if (historyOpen) loadHistory();
+}
+
+async function loadHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px 0">Ładowanie...</div>';
+  try {
+    const r = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'get_history'}),
+      signal:(()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),15000);return ac.signal;})()
+    });
+    const res = await r.json();
+    if (res.success && res.history && res.history.length > 0) {
+      renderHistory(res.history);
+    } else {
+      list.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px 0">Brak dokumentów w historii</div>';
+    }
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:12px;padding:20px 0">Błąd ładowania: ' + e.message + '</div>';
+  }
+}
+
+function renderHistory(history) {
+  const list = document.getElementById('historyList');
+  list.innerHTML = history.map((item, i) => `
+    <div class="hist-item" onclick="openHistoryDoc(${i})">
+      <div class="hist-item-type">${item.docType || item.tab || 'Dokument'}</div>
+      <div class="hist-item-name">${item.patientName || 'Pacjent bez nazwiska'} ${item.pesel ? '· ' + item.pesel : ''}</div>
+      <div class="hist-item-time">${item.generatedAt || ''}</div>
+    </div>
+  `).join('');
+  window._historyData = history;
+}
+
+function openHistoryDoc(idx) {
+  const item = window._historyData[idx];
+  if (!item) return;
+  showResult(item.document, item.tab || 'przyjecie');
+  toggleHistory();
+}
+</script>
+
+</body>
+</html>
