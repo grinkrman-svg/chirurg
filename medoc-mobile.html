@@ -1,0 +1,2428 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chirurg Mobile — Szpital Chojnice</title>
+<link rel="manifest" href="manifest-v2.json">
+<meta name="theme-color" content="#2E6B8A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chirurg">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ════════════════════════════════════════════════════════
+   CSS VARIABLES — CHOJNICE MEDICAL THEME
+   ════════════════════════════════════════════════════════ */
+:root {
+  --lake: #2E6B8A;
+  --lake-light: #3A8DB5;
+  --lake-dark: #1E4F6B;
+  --forest: #3A7D5C;
+  --forest-light: #4A9E74;
+  --sand: #E8DCC8;
+  --sand-light: #F4F1EC;
+  --sand-dark: #D4C4A8;
+  --brick: #8B5E3C;
+  --brick-light: #A67B5B;
+  --cream: #FFFDF9;
+  --danger: #C44040;
+  --warning: #D4920B;
+  --success: #3A7D5C;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 16px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+  --transition: 0.25s cubic-bezier(.4,0,.2,1);
+  --font-display: 'Merriweather', Georgia, serif;
+  --font-body: 'Fira Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+}
+[data-theme="light"] {
+  --bg: #F4F1EC;
+  --bg2: #FFFDF9;
+  --bg3: #EDE6DA;
+  --bg4: #E8DCC8;
+  --border: #D4C4A8;
+  --border-light: #E8DCC8;
+  --text: #1A1A2E;
+  --text2: #5A5A6E;
+  --text3: #8B7355;
+  --card: #FFFDF9;
+  --input-bg: #F4F1EC;
+  --header-bg: #2E6B8A;
+  --header-text: #FFFFFF;
+}
+[data-theme="dark"] {
+  --bg: #0F1A24;
+  --bg2: #162230;
+  --bg3: #1C2E3E;
+  --bg4: #243A4C;
+  --border: #2A4358;
+  --border-light: #1C2E3E;
+  --text: #E0E8F0;
+  --text2: #8BA4B8;
+  --text3: #5E7A8E;
+  --card: #162230;
+  --input-bg: #0F1A24;
+  --header-bg: #0D1820;
+  --header-text: #E0E8F0;
+}
+
+/* ════════════════════════════════════════════════════════
+   RESET & BASE
+   ════════════════════════════════════════════════════════ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ════════════════════════════════════════════════════════
+   HEADER
+   ════════════════════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 16px;
+  height: 62px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.logo {
+  display: flex; align-items: center; gap: 12px;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--forest), var(--lake));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.logo-sub {
+  font-size: 10px; font-weight: 400;
+  opacity: 0.7; letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.header-spacer { flex: 1; }
+.header-stats {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; opacity: 0.85;
+}
+.stats-badge {
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px; padding: 4px 12px;
+  font-family: var(--font-mono); font-size: 11px;
+  display: flex; align-items: center; gap: 6px;
+}
+.stats-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4ADE80;
+  box-shadow: 0 0 8px #4ADE80;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.header-clock {
+  font-family: var(--font-mono); font-size: 12px;
+  opacity: 0.7;
+}
+.header-controls {
+  display: flex; align-items: center; gap: 8px;
+}
+.theme-toggle {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 4px;
+  display: flex; gap: 2px; cursor: pointer;
+}
+.theme-btn {
+  background: none; border: none;
+  padding: 5px 10px; border-radius: 16px;
+  font-size: 12px; cursor: pointer;
+  color: rgba(255,255,255,0.5);
+  transition: all var(--transition);
+  font-family: var(--font-body);
+}
+.theme-btn.active {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+.lang-toggle {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 4px;
+  display: flex; gap: 2px;
+}
+.lang-btn {
+  background: none; border: none;
+  padding: 5px 10px; border-radius: 16px;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer;
+  color: rgba(255,255,255,0.5);
+  transition: all var(--transition);
+  font-family: var(--font-body);
+}
+.lang-btn.active {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABS
+   ════════════════════════════════════════════════════════ */
+.tabs-wrap {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--forest);
+  padding: 0 24px;
+  display: flex; gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tab {
+  background: none; border: none;
+  padding: 14px 22px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-body);
+  position: relative;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--lake);
+  border-bottom-color: var(--lake);
+  font-weight: 600;
+}
+.tab-icon { font-size: 15px; }
+
+/* ════════════════════════════════════════════════════════
+   MAIN CONTENT
+   ════════════════════════════════════════════════════════ */
+main {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 100px; /* space for fixed bottom bar */
+}
+.panel {
+  display: none;
+  animation: panelIn 0.3s ease;
+}
+.panel.active { display: block; }
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════════════════════════════════════════════
+   CARDS
+   ════════════════════════════════════════════════════════ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--forest);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  transition: all var(--transition);
+}
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  border-left-color: var(--lake);
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 700;
+  color: var(--lake);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::after {
+  content: ''; flex: 1;
+  height: 1px; background: var(--border-light);
+}
+
+/* ════════════════════════════════════════════════════════
+   FORM ELEMENTS
+   ════════════════════════════════════════════════════════ */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width:700px) { .form-grid, .form-grid-3 { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.field.full { grid-column: 1 / -1; }
+.label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text3);
+}
+.input-wrap {
+  position: relative;
+  display: flex; align-items: center;
+}
+.input-wrap input,
+.input-wrap textarea,
+.input-wrap select {
+  flex: 1;
+}
+.mic-btn {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 50%; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 12px;
+  transition: all var(--transition);
+  color: var(--text3);
+}
+.mic-btn:hover { border-color: var(--lake); color: var(--lake); }
+.mic-btn.recording {
+  border-color: var(--danger); color: var(--danger);
+  background: rgba(196,64,64,0.08);
+  animation: micPulse 1s infinite;
+}
+@keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(196,64,64,0)} 50%{box-shadow:0 0 0 6px rgba(196,64,64,0.15)} }
+
+input[type=text], input[type=date], input[type=number], select, textarea {
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 14px;
+  padding-right: 40px; /* space for mic button */
+  transition: border-color var(--transition);
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--lake);
+  box-shadow: 0 0 0 3px rgba(46,107,138,0.1);
+}
+textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+select { cursor: pointer; padding-right: 14px; }
+
+/* ════════════════════════════════════════════════════════
+   ICD-10 AUTOCOMPLETE
+   ════════════════════════════════════════════════════════ */
+.icd-wrap { position: relative; }
+.icd-dropdown {
+  display: none;
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--bg2);
+  border: 1.5px solid var(--lake);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  max-height: 240px; overflow-y: auto;
+}
+.icd-dropdown.open { display: block; }
+.icd-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px;
+  transition: background var(--transition);
+  border-bottom: 1px solid var(--border-light);
+}
+.icd-item:last-child { border-bottom: none; }
+.icd-item:hover { background: var(--bg3); }
+.icd-code {
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 600;
+  color: var(--lake);
+  min-width: 60px;
+  background: rgba(46,107,138,0.08);
+  padding: 2px 8px; border-radius: 4px;
+}
+.icd-name { color: var(--text2); font-size: 12px; }
+.icd-ai-btn {
+  background: rgba(58,125,92,0.1);
+  border: 1.5px solid var(--forest);
+  border-radius: var(--radius-sm);
+  color: var(--forest);
+  padding: 9px 14px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.icd-ai-btn:hover { background: rgba(58,125,92,0.15); }
+
+/* ════════════════════════════════════════════════════════
+   PHOTO SECTION
+   ════════════════════════════════════════════════════════ */
+.photo-controls {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 10px;
+}
+.photo-type-select {
+  padding-right: 14px !important;
+  max-width: 160px;
+}
+.btn-photo {
+  background: var(--bg3); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2); padding: 9px 16px;
+  font-size: 13px; cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-body);
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-photo:hover { border-color: var(--lake); color: var(--lake); }
+.photo-previews {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;
+}
+.photo-thumb-wrap {
+  position: relative; display: inline-block;
+}
+.photo-thumb {
+  width: 72px; height: 72px;
+  border-radius: 8px; object-fit: cover;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+.photo-thumb:hover { border-color: var(--lake); }
+.photo-badge {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.7);
+  color: var(--lake-light);
+  font-size: 8px; font-weight: 700;
+  text-align: center; padding: 2px;
+  border-radius: 0 0 6px 6px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.photo-remove {
+  position: absolute; top: -6px; right: -6px;
+  background: var(--danger); color: white;
+  border-radius: 50%; width: 20px; height: 20px;
+  font-size: 12px; border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.photo-dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 20px; text-align: center;
+  color: var(--text3); font-size: 13px;
+  transition: all var(--transition);
+  cursor: pointer;
+  min-height: 72px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.photo-dropzone.dragover {
+  border-color: var(--lake);
+  background: rgba(46,107,138,0.05);
+  color: var(--lake);
+}
+
+/* ════════════════════════════════════════════════════════
+   VOICE BUTTON
+   ════════════════════════════════════════════════════════ */
+.btn-voice {
+  background: var(--bg3); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2); padding: 10px 18px;
+  font-size: 13px; cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-body);
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-voice:hover { border-color: var(--lake); color: var(--lake); }
+.btn-voice.recording {
+  border-color: var(--danger); color: var(--danger);
+  background: rgba(196,64,64,0.06);
+  animation: micPulse 1s infinite;
+}
+.recording-timer {
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--danger); display: none;
+}
+.recording-timer.visible { display: inline-block; }
+
+/* ════════════════════════════════════════════════════════
+   TEMPLATES / QUICK INSERT
+   ════════════════════════════════════════════════════════ */
+.templates-grid {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.tpl-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 20px; color: var(--text2);
+  padding: 5px 12px; font-size: 11px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition);
+  font-family: var(--font-body);
+}
+.tpl-btn:hover {
+  border-color: var(--forest); color: var(--forest);
+  background: rgba(58,125,92,0.06);
+}
+
+/* ════════════════════════════════════════════════════════
+   BOTTOM BAR (FIXED)
+   ════════════════════════════════════════════════════════ */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 90;
+  background: var(--bg2);
+  border-top: 2px solid var(--forest);
+  padding: 12px 24px;
+  display: flex; gap: 12px; align-items: center;
+  justify-content: center;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+.btn-generate {
+  background: linear-gradient(135deg, var(--lake), var(--lake-dark));
+  color: white; border: none;
+  border-radius: var(--radius);
+  padding: 14px 36px;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: var(--font-body);
+  display: flex; align-items: center; gap: 10px;
+  letter-spacing: -0.2px;
+  box-shadow: 0 4px 20px rgba(46,107,138,0.35);
+  transition: all var(--transition);
+}
+.btn-generate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(46,107,138,0.45);
+}
+.btn-generate:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none;
+}
+.btn-history {
+  background: var(--card);
+  border: 2px solid var(--forest);
+  color: var(--forest);
+  border-radius: var(--radius);
+  padding: 14px 28px;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: var(--font-body);
+  display: flex; align-items: center; gap: 8px;
+  transition: all var(--transition);
+}
+.btn-history:hover {
+  background: rgba(58,125,92,0.08);
+  transform: translateY(-1px);
+}
+.btn-clear {
+  background: none; border: 1px solid var(--border);
+  color: var(--text3); border-radius: var(--radius-sm);
+  padding: 10px 16px; font-size: 12px;
+  cursor: pointer; font-family: var(--font-body);
+  transition: all var(--transition);
+}
+.btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ════════════════════════════════════════════════════════
+   HISTORIA PANEL (SLIDE-IN RIGHT)
+   ════════════════════════════════════════════════════════ */
+.history-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+}
+.history-overlay.visible { display: block; }
+.history-panel {
+  position: fixed; top: 0; right: -400px; bottom: 0;
+  width: 380px; max-width: 90vw;
+  background: var(--bg2);
+  border-left: 2px solid var(--forest);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+  z-index: 301;
+  display: flex; flex-direction: column;
+  transition: right 0.35s cubic-bezier(.4,0,.2,1);
+}
+.history-overlay.visible .history-panel { right: 0; }
+.history-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.history-title {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 700;
+  color: var(--lake); flex: 1;
+}
+.history-close {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text2);
+  padding: 7px 14px; font-size: 13px;
+  cursor: pointer; font-family: var(--font-body);
+  transition: all var(--transition);
+}
+.history-close:hover { border-color: var(--danger); color: var(--danger); }
+.history-filters {
+  padding: 12px 20px;
+  display: flex; flex-wrap: wrap; gap: 6px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.filter-chip {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 20px; color: var(--text3);
+  padding: 5px 14px; font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+  font-family: var(--font-body);
+}
+.filter-chip:hover { border-color: var(--lake); color: var(--lake); }
+.filter-chip.active {
+  background: var(--lake);
+  border-color: var(--lake);
+  color: white;
+}
+.history-list {
+  flex: 1; overflow-y: auto; padding: 12px;
+}
+.history-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--forest);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.history-item:hover {
+  border-left-color: var(--lake);
+  box-shadow: var(--shadow);
+}
+.history-item-date {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--text3);
+  margin-bottom: 4px;
+}
+.history-item-type {
+  display: inline-block;
+  background: rgba(46,107,138,0.1);
+  color: var(--lake);
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.history-item-preview {
+  font-size: 12px; color: var(--text2);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.history-empty {
+  padding: 40px 20px; text-align: center;
+  color: var(--text3); font-size: 14px;
+}
+
+/* ════════════════════════════════════════════════════════
+   RESULT OVERLAY
+   ════════════════════════════════════════════════════════ */
+.result-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  align-items: flex-start; justify-content: center;
+  padding: 24px; overflow-y: auto;
+}
+.result-overlay.visible { display: flex; }
+.result-modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%; max-width: 760px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  animation: modalIn 0.3s ease;
+  margin: auto;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(.96) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.result-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.result-title {
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 16px;
+  flex: 1;
+}
+.result-type-badge {
+  background: rgba(46,107,138,0.12);
+  color: var(--lake);
+  font-size: 11px; font-weight: 700;
+  padding: 3px 12px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.result-body { padding: 24px; }
+.result-textarea {
+  width: 100%; min-height: 50vh;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.7;
+  padding: 16px; resize: vertical;
+}
+.result-textarea:focus { outline: none; border-color: var(--lake); }
+.result-actions {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: center;
+  flex-wrap: wrap;
+}
+.btn-pdf {
+  background: var(--danger); color: white;
+  border: none; border-radius: var(--radius-sm);
+  padding: 11px 20px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: var(--font-body);
+  transition: all var(--transition);
+}
+.btn-pdf:hover { filter: brightness(1.1); }
+.btn-docx {
+  background: var(--lake); color: white;
+  border: none; border-radius: var(--radius-sm);
+  padding: 11px 20px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: var(--font-body);
+  transition: all var(--transition);
+}
+.btn-docx:hover { filter: brightness(1.1); }
+.btn-copy {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); border-radius: var(--radius-sm);
+  padding: 11px 20px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body);
+  transition: all var(--transition);
+}
+.btn-copy:hover { border-color: var(--forest); color: var(--forest); }
+.result-close {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text2);
+  padding: 7px 14px; font-size: 13px;
+  cursor: pointer; font-family: var(--font-body);
+}
+.result-close:hover { border-color: var(--danger); color: var(--danger); }
+.result-meta {
+  font-size: 12px; color: var(--text3);
+  margin-top: 4px;
+}
+.result-spacer { flex: 1; }
+.char-count {
+  font-size: 12px; color: var(--text3);
+  font-family: var(--font-mono);
+}
+
+/* ════════════════════════════════════════════════════════
+   LOADER
+   ════════════════════════════════════════════════════════ */
+.loader-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.loader-overlay.visible { display: flex; }
+.loader-spinner {
+  width: 52px; height: 52px;
+  border: 3px solid var(--border);
+  border-top-color: var(--lake);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text {
+  color: var(--text2); font-size: 14px;
+  text-align: center; max-width: 300px;
+  line-height: 1.5;
+}
+.loader-humor {
+  color: var(--forest);
+  font-size: 15px; font-weight: 600;
+  font-family: var(--font-display);
+  text-align: center; max-width: 340px;
+  line-height: 1.5;
+  animation: humorFade 0.5s ease;
+}
+@keyframes humorFade { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+
+/* ════════════════════════════════════════════════════════
+   TOAST
+   ════════════════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 80px; right: 24px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px; font-size: 13px;
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.3s ease;
+  display: flex; align-items: center; gap: 8px;
+  max-width: 360px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--danger); }
+.toast.info { border-left: 3px solid var(--lake); }
+
+/* ════════════════════════════════════════════════════════
+   RADIO PLAYER
+   ════════════════════════════════════════════════════════ */
+.radio-bar {
+  position: fixed; bottom: 70px; left: 24px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 14px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-lg); z-index: 80;
+  font-size: 12px;
+  transition: all var(--transition);
+}
+.radio-bar.hidden { transform: translateY(20px); opacity: 0; pointer-events: none; }
+.radio-toggle {
+  background: none; border: none;
+  cursor: pointer; font-size: 16px;
+  color: var(--text2);
+  transition: color var(--transition);
+}
+.radio-toggle.playing { color: var(--forest); }
+.radio-name {
+  font-weight: 600; color: var(--text);
+  max-width: 120px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.radio-eq {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 16px;
+}
+.radio-eq span {
+  display: block; width: 3px;
+  background: var(--forest);
+  border-radius: 1px;
+  animation: eq 0.8s ease-in-out infinite alternate;
+}
+.radio-eq span:nth-child(1) { height: 6px; animation-delay: 0s; }
+.radio-eq span:nth-child(2) { height: 12px; animation-delay: 0.2s; }
+.radio-eq span:nth-child(3) { height: 8px; animation-delay: 0.4s; }
+.radio-eq span:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+.radio-eq.paused span { animation: none; height: 3px; }
+@keyframes eq { 0%{height:3px} 100%{height:16px} }
+.radio-prev, .radio-next {
+  background: none; border: none;
+  cursor: pointer; font-size: 14px;
+  color: var(--text3);
+  padding: 2px 4px;
+}
+.radio-prev:hover, .radio-next:hover { color: var(--text); }
+
+/* ════════════════════════════════════════════════════════
+   BMI CALCULATOR
+   ════════════════════════════════════════════════════════ */
+.bmi-result {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(46,107,138,0.08);
+  border-radius: 20px; padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 600;
+  color: var(--lake);
+}
+.bmi-category {
+  font-family: var(--font-body);
+  font-size: 11px; color: var(--text3);
+}
+
+/* ════════════════════════════════════════════════════════
+   NOTES TAB
+   ════════════════════════════════════════════════════════ */
+.notes-area {
+  width: 100%; min-height: 200px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text); font-family: var(--font-body);
+  font-size: 14px; line-height: 1.7;
+  padding: 16px; resize: vertical;
+}
+.notes-saved {
+  font-size: 11px; color: var(--forest);
+  font-style: italic; margin-top: 6px;
+}
+
+/* ════════════════════════════════════════════════════════
+   SCROLLBAR
+   ════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ════════════════════════════════════════════════════════
+   DRUG AUTOCOMPLETE
+   ════════════════════════════════════════════════════════ */
+.drug-dropdown {
+  display: none;
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--bg2);
+  border: 1.5px solid var(--forest);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  max-height: 200px; overflow-y: auto;
+}
+.drug-dropdown.open { display: block; }
+.drug-item {
+  padding: 8px 14px;
+  cursor: pointer; font-size: 12px;
+  transition: background var(--transition);
+  border-bottom: 1px solid var(--border-light);
+}
+.drug-item:hover { background: var(--bg3); }
+.drug-name { font-weight: 600; color: var(--text); }
+.drug-dose { color: var(--text3); font-size: 11px; margin-top: 2px; }
+
+/* ═══ MOBILE OVERRIDES ═══ */
+@media(max-width:768px) {
+  header { height:52px; padding:0 12px; gap:10px; }
+  .logo-text { font-size:14px; }
+  .logo-sub { font-size:9px; }
+  .logo-icon { width:30px; height:30px; font-size:15px; }
+  .tabs-wrap { padding:0 8px; }
+  .tab { padding:10px 12px; font-size:11px; }
+  main { padding:12px; padding-bottom:110px; max-width:100%; }
+  .card { padding:14px; margin-bottom:10px; }
+  .card-title { font-size:10px; margin-bottom:10px; }
+  .form-grid, .form-grid-3 { grid-template-columns:1fr; gap:10px; }
+  .bottom-bar { padding:8px 12px calc(8px + env(safe-area-inset-bottom)); gap:8px; }
+  .btn-generate { padding:12px 20px; font-size:14px; }
+  .btn-history { padding:12px 16px; font-size:13px; }
+  .btn-clear { padding:8px 12px; font-size:11px; }
+  .history-panel { width:100%; max-width:100%; }
+  .result-modal { border-radius:12px; }
+  .radio-bar { bottom:62px; left:8px; padding:6px 10px; font-size:10px; }
+  .photo-controls { gap:6px; }
+  .btn-photo { padding:8px 12px; font-size:11px; }
+  .photo-type-select { max-width:120px; font-size:12px; }
+  .stats-badge { font-size:10px; padding:3px 8px; }
+  .header-controls { gap:4px; }
+  .theme-btn, .lang-btn { padding:4px 8px; font-size:11px; }
+  .toast { bottom:72px; left:12px; right:12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div class="loader-overlay" id="loader">
+  <div class="loader-spinner"></div>
+  <div class="loader-humor" id="loaderHumor"></div>
+  <div class="loader-text" id="loaderText">Generowanie dokumentu...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-modal">
+    <div class="result-header">
+      <div>
+        <div class="result-title">Podgląd dokumentu</div>
+        <div class="result-meta" id="resultMeta"></div>
+      </div>
+      <span class="result-type-badge" id="resultBadge">—</span>
+      <button class="result-close" onclick="closeResult()">✕ Zamknij</button>
+    </div>
+    <div class="result-body">
+      <textarea class="result-textarea" id="resultText" placeholder="Tutaj pojawi się wygenerowany dokument..."></textarea>
+    </div>
+    <div class="result-actions">
+      <button class="btn-copy" onclick="copyResult()">📋 Kopiuj</button>
+      <button class="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
+      <button class="btn-docx" onclick="downloadDOCX()">📝 DOCX</button>
+      <div class="result-spacer"></div>
+      <span class="char-count" id="charCount">0 znaków</span>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORIA PANEL -->
+<div class="history-overlay" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
+  <div class="history-panel">
+    <div class="history-header">
+      <div class="history-title">📋 Historia dokumentów</div>
+      <button class="history-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div class="history-filters">
+      <button class="filter-chip active" onclick="filterHistory('all',this)">Wszystkie</button>
+      <button class="filter-chip" onclick="filterHistory('przyjecie',this)">Przyjęcie</button>
+      <button class="filter-chip" onclick="filterHistory('wypis',this)">Wypis</button>
+      <button class="filter-chip" onclick="filterHistory('ambulatorium',this)">SOR</button>
+      <button class="filter-chip" onclick="filterHistory('konsultacja',this)">Konsultacja</button>
+      <button class="filter-chip" onclick="filterHistory('zalecenia',this)">Zalecenia</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">Naciśnij aby załadować historię</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚕</div>
+    <div>
+      <div class="logo-text">Chirurg Assistant</div>
+      <div class="logo-sub">Szpital Chojnice · Oddział Chirurgii Ogólnej</div>
+    </div>
+  </div>
+  <div class="header-spacer"></div>
+  <div class="header-stats">
+    <div class="stats-badge">
+      <div class="stats-dot"></div>
+      <span id="currentTime">—</span>
+    </div>
+    <div class="stats-badge" id="todayCount">Dziś: 0 dok.</div>
+  </div>
+  <div class="header-controls">
+    <div class="theme-toggle">
+      <button class="theme-btn" id="btnLight" onclick="setTheme('light')">☀️</button>
+      <button class="theme-btn active" id="btnDark" onclick="setTheme('dark')">🌙</button>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="langPL" onclick="setVoiceLang('pl-PL')">PL</button>
+      <button class="lang-btn" id="langRU" onclick="setVoiceLang('ru-RU')">RU</button>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════ -->
+<!-- TABS -->
+<!-- ════════════════════════════════════════ -->
+<div class="tabs-wrap">
+  <button class="tab active" onclick="switchTab('przyjecie',this)"><span class="tab-icon">🏥</span> Przyjęcie</button>
+  <button class="tab" onclick="switchTab('wypis',this)"><span class="tab-icon">📋</span> Wypis</button>
+  <button class="tab" onclick="switchTab('ambulatorium',this)"><span class="tab-icon">🩺</span> Ambulatorium</button>
+  <button class="tab" onclick="switchTab('konsultacja',this)"><span class="tab-icon">💬</span> Konsultacja</button>
+  <button class="tab" onclick="switchTab('zalecenia',this)"><span class="tab-icon">💊</span> Zalecenia</button>
+  <button class="tab" onclick="switchTab('notatki',this)"><span class="tab-icon">📝</span> Notatki</button>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- MAIN CONTENT -->
+<!-- ════════════════════════════════════════ -->
+<main>
+
+<!-- ══ PRZYJĘCIE ══ -->
+<div class="panel active" id="panel-przyjecie">
+  <div class="card">
+    <div class="card-title">Dane kliniczne</div>
+    <div class="form-grid">
+      <div class="field"><label class="label">Powód przyjęcia</label><div class="input-wrap"><input type="text" id="p_reason" placeholder="Ból brzucha, krwawienie..."><button class="mic-btn" onclick="micField('p_reason')" title="Dyktuj">🎤</button></div></div>
+      <div class="field"><label class="label">Tryb przyjęcia</label><select id="p_mode"><option>Nagły (SOR)</option><option>Planowy</option></select></div>
+      <div class="field"><label class="label">Na SOR wykonano</label><div class="input-wrap"><input type="text" id="p_sor" placeholder="RTG, USG, lab..."><button class="mic-btn" onclick="micField('p_sor')" title="Dyktuj">🎤</button></div></div>
+      <div class="field"><label class="label">Płeć</label><select id="p_gender"><option value="M">Mężczyzna</option><option value="K">Kobieta</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Wywiad</div>
+    <div class="form-grid">
+      <div class="field"><label class="label">Choroby przewlekłe</label><div class="input-wrap"><input type="text" id="p_chronic" placeholder="HA, DM, ..."><button class="mic-btn" onclick="micField('p_chronic')" title="Dyktuj">🎤</button></div></div>
+      <div class="field"><label class="label">Przyjmowane leki</label><div class="input-wrap"><input type="text" id="p_meds" placeholder="Leki..."><button class="mic-btn" onclick="micField('p_meds')" title="Dyktuj">🎤</button></div></div>
+      <div class="field"><label class="label">Uczulenia</label><div class="input-wrap"><input type="text" id="p_allergy" placeholder="Brak / penicylina..."><button class="mic-btn" onclick="micField('p_allergy')" title="Dyktuj">🎤</button></div></div>
+      <div class="field"><label class="label">Nałogi</label><div class="input-wrap"><input type="text" id="p_habits" placeholder="Palenie, alkohol..."><button class="mic-btn" onclick="micField('p_habits')" title="Dyktuj">🎤</button></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Parametry życiowe</div>
+    <div class="form-grid-3">
+      <div class="field"><label class="label">RR (mmHg)</label><input type="text" id="p_rr" placeholder="120/80"></div>
+      <div class="field"><label class="label">Tętno (/min)</label><input type="number" id="p_hr" placeholder="72"></div>
+      <div class="field"><label class="label">Temp (°C)</label><input type="text" id="p_temp" placeholder="36.6"></div>
+      <div class="field"><label class="label">SpO2 (%)</label><input type="number" id="p_spo2" placeholder="98"></div>
+      <div class="field"><label class="label">Wzrost (cm)</label><input type="number" id="p_height" placeholder="175" onchange="calcBMI()"></div>
+      <div class="field"><label class="label">Masa (kg)</label><input type="number" id="p_weight" placeholder="80" onchange="calcBMI()"></div>
+    </div>
+    <div id="bmiDisplay" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Dyktowanie głosowe</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <button class="btn-voice" id="voiceBtn_przyjecie" onclick="toggleMainVoice('przyjecie')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_przyjecie"></span>
+    </div>
+    <textarea id="p_voice_text" placeholder="Transkrypcja głosu lub dodatkowe uwagi kliniczne..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Zdjęcia / wyniki badań</div>
+    <div class="photo-controls">
+      <select class="photo-type-select" id="photoType_przyjecie">
+        <option value="lab">🧪 Wyniki lab</option><option value="rtg">📡 RTG</option><option value="tk">🔬 TK</option>
+        <option value="usg">🫀 USG</option><option value="mri">🧲 MRI</option><option value="ekg">💓 EKG</option><option value="inne" selected>📷 Inne</option>
+      </select>
+      <button class="btn-photo" onclick="takePhoto('przyjecie')">📷 Zdjęcie</button>
+      <button class="btn-photo" onclick="addPhoto('przyjecie')">📁 Galeria</button>
+    </div>
+    <div class="photo-dropzone" id="dropzone_przyjecie" onclick="addPhoto('przyjecie')" style="display:none"></div>
+    <input type="file" id="photoInput_przyjecie" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'przyjecie')">
+    <input type="file" id="cameraInput_przyjecie" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'przyjecie')">
+    <div class="photo-previews" id="previews_przyjecie"></div>
+  </div>
+</div>
+
+<!-- ══ WYPIS ══ -->
+<div class="panel" id="panel-wypis">
+  <div class="card">
+    <div class="card-title">Dane wypisowe</div>
+    <div class="form-grid">
+      <div class="field"><label class="label">Data przyjęcia</label><input type="text" id="w_admit" placeholder="dd.mm.rrrr" autocomplete="off"></div>
+      <div class="field"><label class="label">Data wypisu</label><input type="text" id="w_discharge" placeholder="dd.mm.rrrr" autocomplete="off"></div>
+      <div class="field full"><label class="label">Rozpoznanie</label>
+        <div class="icd-wrap">
+          <div style="display:flex;gap:8px"><div class="input-wrap" style="flex:1"><input type="text" id="w_diag" placeholder="Wpisz rozpoznanie..." oninput="searchICD(this.value,'w')"><button class="mic-btn" onclick="micField('w_diag')" title="Dyktuj">🎤</button></div><button class="icd-ai-btn" onclick="aiICD('w_diag','w_icd_code')">🤖 ICD AI</button></div>
+          <div class="icd-dropdown" id="icdDrop_w"></div>
+          <input type="text" id="w_icd_code" placeholder="Kod ICD-10" readonly style="margin-top:6px;background:var(--bg3);font-family:var(--font-mono);font-size:13px">
+        </div>
+      </div>
+      <div class="field"><label class="label">Tryb wypisu</label><select id="w_mode"><option>Do domu</option><option>Na rehabilitację</option><option>Do innego szpitala</option><option>Na własne żądanie</option></select></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Dyktowanie</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <button class="btn-voice" id="voiceBtn_wypis" onclick="toggleMainVoice('wypis')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_wypis"></span>
+    </div>
+    <textarea id="w_voice_text" placeholder="Leczenie, epikryza, zalecenia po wypisie..."></textarea>
+  </div>
+  <div class="card">
+    <div class="card-title">Zdjęcia</div>
+    <div class="photo-controls">
+      <select class="photo-type-select" id="photoType_wypis"><option value="lab">🧪 Lab</option><option value="rtg">📡 RTG</option><option value="inne" selected>📷 Inne</option></select>
+      <button class="btn-photo" onclick="takePhoto('wypis')">📷 Zdjęcie</button>
+      <button class="btn-photo" onclick="addPhoto('wypis')">📁 Galeria</button>
+    </div>
+    <div class="photo-dropzone" id="dropzone_wypis" onclick="addPhoto('wypis')" style="display:none"></div>
+    <input type="file" id="photoInput_wypis" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'wypis')">
+    <input type="file" id="cameraInput_wypis" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'wypis')">
+    <div class="photo-previews" id="previews_wypis"></div>
+  </div>
+</div>
+
+<!-- ══ AMBULATORIUM ══ -->
+<div class="panel" id="panel-ambulatorium">
+  <div class="card">
+    <div class="card-title">Wizyta ambulatoryjna — SOR</div>
+    <div class="form-grid">
+      <div class="field full"><label class="label">Powód wizyty / dolegliwość</label><div class="input-wrap"><input type="text" id="a_complaint" placeholder="Ból, uraz, krwawienie..."><button class="mic-btn" onclick="micField('a_complaint')" title="Dyktuj">🎤</button></div></div>
+      <div class="field full"><label class="label">Rozpoznanie</label>
+        <div class="icd-wrap">
+          <div style="display:flex;gap:8px"><div class="input-wrap" style="flex:1"><input type="text" id="a_diag" placeholder="Rozpoznanie..." oninput="searchICD(this.value,'a')"><button class="mic-btn" onclick="micField('a_diag')" title="Dyktuj">🎤</button></div><button class="icd-ai-btn" onclick="aiICD('a_diag','a_icd_code')">🤖 ICD AI</button></div>
+          <div class="icd-dropdown" id="icdDrop_a"></div>
+          <input type="text" id="a_icd_code" placeholder="Kod ICD-10" readonly style="margin-top:6px;background:var(--bg3);font-family:var(--font-mono)">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Parametry</div>
+    <div class="form-grid-3">
+      <div class="field"><label class="label">RR</label><input type="text" id="a_rr" placeholder="120/80"></div>
+      <div class="field"><label class="label">Tętno</label><input type="number" id="a_hr" placeholder="72"></div>
+      <div class="field"><label class="label">Temp</label><input type="text" id="a_temp" placeholder="36.6"></div>
+      <div class="field"><label class="label">SpO2</label><input type="number" id="a_spo2" placeholder="98"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Dyktowanie</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <button class="btn-voice" id="voiceBtn_ambulatorium" onclick="toggleMainVoice('ambulatorium')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_ambulatorium"></span>
+    </div>
+    <textarea id="a_voice_text" placeholder="Badanie fizykalne, plan leczenia..."></textarea>
+  </div>
+  <div class="card">
+    <div class="card-title">Zdjęcia</div>
+    <div class="photo-controls">
+      <select class="photo-type-select" id="photoType_ambulatorium"><option value="lab">🧪 Lab</option><option value="rtg">📡 RTG</option><option value="tk">🔬 TK</option><option value="usg">🫀 USG</option><option value="ekg">💓 EKG</option><option value="inne" selected>📷 Inne</option></select>
+      <button class="btn-photo" onclick="takePhoto('ambulatorium')">📷 Zdjęcie</button>
+      <button class="btn-photo" onclick="addPhoto('ambulatorium')">📁 Galeria</button>
+    </div>
+    <div class="photo-dropzone" id="dropzone_ambulatorium" onclick="addPhoto('ambulatorium')" style="display:none"></div>
+    <input type="file" id="photoInput_ambulatorium" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'ambulatorium')">
+    <input type="file" id="cameraInput_ambulatorium" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'ambulatorium')">
+    <div class="photo-previews" id="previews_ambulatorium"></div>
+  </div>
+</div>
+
+<!-- ══ KONSULTACJA ══ -->
+<div class="panel" id="panel-konsultacja">
+  <div class="card">
+    <div class="card-title">Konsultacja specjalistyczna</div>
+    <div class="form-grid">
+      <div class="field"><label class="label">Specjalność</label>
+        <select id="k_specialty">
+          <option value="chirurgiczna">Chirurgiczna</option><option value="ortopedyczna">Ortopedyczna</option>
+          <option value="kardiologiczna">Kardiologiczna</option><option value="ginekologiczna">Ginekologiczna</option>
+          <option value="internistyczna">Internistyczna</option><option value="neurologiczna">Neurologiczna</option>
+          <option value="urologiczna">Urologiczna</option><option value="pulmonologiczna">Pulmonologiczna</option>
+          <option value="inna">Inna</option>
+        </select>
+      </div>
+      <div class="field"><label class="label">Zlecający</label><div class="input-wrap"><input type="text" id="k_from" placeholder="SOR, Oddział wewnętrzny..."><button class="mic-btn" onclick="micField('k_from')" title="Dyktuj">🎤</button></div></div>
+      <div class="field full"><label class="label">Powód konsultacji</label><div class="input-wrap"><input type="text" id="k_reason" placeholder="Ból brzucha, ocena do zabiegu..."><button class="mic-btn" onclick="micField('k_reason')" title="Dyktuj">🎤</button></div></div>
+      <div class="field full"><label class="label">Rozpoznanie</label>
+        <div class="icd-wrap">
+          <div style="display:flex;gap:8px"><div class="input-wrap" style="flex:1"><input type="text" id="k_diag" placeholder="Rozpoznanie..." oninput="searchICD(this.value,'k')"><button class="mic-btn" onclick="micField('k_diag')" title="Dyktuj">🎤</button></div><button class="icd-ai-btn" onclick="aiICD('k_diag','k_icd_code')">🤖 ICD AI</button></div>
+          <div class="icd-dropdown" id="icdDrop_k"></div>
+          <input type="text" id="k_icd_code" placeholder="Kod ICD-10" readonly style="margin-top:6px;background:var(--bg3);font-family:var(--font-mono)">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Dyktowanie</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <button class="btn-voice" id="voiceBtn_konsultacja" onclick="toggleMainVoice('konsultacja')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_konsultacja"></span>
+    </div>
+    <textarea id="k_voice_text" placeholder="Wywiad, badanie fizykalne, wnioski..."></textarea>
+  </div>
+  <div class="card">
+    <div class="card-title">Zdjęcia</div>
+    <div class="photo-controls">
+      <select class="photo-type-select" id="photoType_konsultacja"><option value="lab">🧪 Lab</option><option value="rtg">📡 RTG</option><option value="usg">🫀 USG</option><option value="inne" selected>📷 Inne</option></select>
+      <button class="btn-photo" onclick="takePhoto('konsultacja')">📷 Zdjęcie</button>
+      <button class="btn-photo" onclick="addPhoto('konsultacja')">📁 Galeria</button>
+    </div>
+    <div class="photo-dropzone" id="dropzone_konsultacja" onclick="addPhoto('konsultacja')" style="display:none"></div>
+    <input type="file" id="photoInput_konsultacja" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'konsultacja')">
+    <input type="file" id="cameraInput_konsultacja" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'konsultacja')">
+    <div class="photo-previews" id="previews_konsultacja"></div>
+  </div>
+</div>
+
+<!-- ══ ZALECENIA ══ -->
+<div class="panel" id="panel-zalecenia">
+  <div class="card">
+    <div class="card-title">Zalecenia domowe</div>
+    <div class="field"><label class="label">Rozpoznanie</label>
+      <div class="icd-wrap">
+        <div style="display:flex;gap:8px"><div class="input-wrap" style="flex:1"><input type="text" id="z_diag" placeholder="Rozpoznanie..." oninput="searchICD(this.value,'z')"><button class="mic-btn" onclick="micField('z_diag')" title="Dyktuj">🎤</button></div><button class="icd-ai-btn" onclick="aiICD('z_diag','z_icd_code')">🤖 ICD AI</button></div>
+        <div class="icd-dropdown" id="icdDrop_z"></div>
+        <input type="text" id="z_icd_code" placeholder="Kod ICD-10" readonly style="margin-top:6px;background:var(--bg3);font-family:var(--font-mono)">
+      </div>
+    </div>
+    <div class="field"><label class="label">Leki przepisane</label><div class="input-wrap"><input type="text" id="z_meds" placeholder="Zacznij pisać nazwę leku..." oninput="searchDrug(this.value,'z')"><button class="mic-btn" onclick="micField('z_meds')" title="Dyktuj">🎤</button></div>
+      <div class="drug-dropdown" id="drugDrop_z"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Dyktowanie</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <button class="btn-voice" id="voiceBtn_zalecenia" onclick="toggleMainVoice('zalecenia')">🎤 Nagraj dyktando</button>
+      <span class="recording-timer" id="timer_zalecenia"></span>
+    </div>
+    <textarea id="z_voice_text" placeholder="Zalecenia, kontrola, kiedy do lekarza..."></textarea>
+  </div>
+</div>
+
+<!-- ══ NOTATKI ══ -->
+<div class="panel" id="panel-notatki">
+  <div class="card">
+    <div class="card-title">Szybkie notatki</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <button class="btn-voice" id="voiceBtn_notatki" onclick="toggleMainVoice('notatki')">🎤 Dyktuj notatkę</button>
+      <span class="recording-timer" id="timer_notatki"></span>
+    </div>
+    <textarea class="notes-area" id="notesArea" placeholder="Notatki osobiste — zapisują się automatycznie..." oninput="saveNotes()"></textarea>
+    <div class="notes-saved" id="notesSaved"></div>
+  </div>
+</div>
+
+</main>
+
+<!-- ════════════════════════════════════════ -->
+<!-- BOTTOM BAR -->
+<!-- ════════════════════════════════════════ -->
+<div class="bottom-bar" id="bottomBar">
+  <button class="btn-clear" onclick="clearForm()">🗑 Wyczyść</button>
+  <button class="btn-generate" id="genBtn" onclick="generate()">✨ Generuj dokument</button>
+  <button class="btn-history" onclick="openHistory()">📋 Historia</button>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- RADIO PLAYER -->
+<!-- ════════════════════════════════════════ -->
+<div class="radio-bar" id="radioBar">
+  <button class="radio-toggle" id="radioToggle" onclick="toggleRadio()">▶</button>
+  <div class="radio-eq paused" id="radioEq"><span></span><span></span><span></span><span></span></div>
+  <div class="radio-name" id="radioName">RMF FM</div>
+  <button class="radio-prev" onclick="prevStation()">◀</button>
+  <button class="radio-next" onclick="nextStation()">▶</button>
+</div>
+<audio id="radioAudio" preload="none"></audio>
+
+<!-- ════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ════════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════
+// ═══ 5 SEPARATE WEBHOOKS (no Switch) ═══
+const WEBHOOKS = {
+  document:  'https://gringoportal.app.n8n.cloud/webhook/chirurg-document',
+  epikryza:  'https://gringoportal.app.n8n.cloud/webhook/chirurg-epikryza',
+  icd:       'https://gringoportal.app.n8n.cloud/webhook/chirurg-icd',
+  history:   'https://gringoportal.app.n8n.cloud/webhook/chirurg-history',
+  voice:     'https://gringoportal.app.n8n.cloud/webhook/chirurg-voice'
+};
+const N8N_WEBHOOK = WEBHOOKS.document;
+const DOCTOR = 'Grynko Roman (nr prawa: 4030783)';
+let currentTab = 'przyjecie';
+let voiceLang = 'pl-PL';
+
+// ════════════════════════════════════════════════════════
+// TAB NAMES
+// ════════════════════════════════════════════════════════
+const tabNames = {
+  przyjecie:'Protokół przyjęcia', wypis:'Karta wypisu',
+  ambulatorium:'Protokół ambulatoryjny', konsultacja:'Konsultacja chirurgiczna',
+  zalecenia:'Zalecenia domowe', notatki:'Notatki'
+};
+
+// ════════════════════════════════════════════════════════
+// MEDICAL HUMOR — 200 PHRASES (Polish)
+// ════════════════════════════════════════════════════════
+const HUMOR = [
+"Myjemy ręce przed operacją na tekście...",
+"Pielęgniarka podaje narzędzia pisarskie...",
+"Chirurg zakłada rękawiczki dokumentacyjne...",
+"Konsylium lekarskie w toku...",
+"Podłączamy kroplówkę danych klinicznych...",
+"Szyjemy dokument ściegiem ciągłym...",
+"Anestezjolog usypia literówki...",
+"Dezynfekujemy formatowanie...",
+"Zakładamy opatrunek na diagnozę...",
+"Pulsoksymetr podpięty do AI...",
+"Asystent podaje klemę na akapit...",
+"Rozpoczynamy resekcję błędów...",
+"Iniekcja danych do szablonu...",
+"Odsysamy zbędne szczegóły...",
+"Zakładamy dren do bazy wiedzy...",
+"Podajemy znieczulenie na chaos...",
+"Stabilizujemy parametry dokumentu...",
+"Wkładamy stent do formatowania...",
+"Laparoskopijnie przeglądamy dane...",
+"Tomografia komputerowa tekstu w toku...",
+"Rezonans magnetyczny wyników...",
+"Biopsja danych zakończona...",
+"Podajemy antybiotyk na bałagan...",
+"Mierzymy ciśnienie dokumentacji...",
+"Osłuchujemy stetoskopem cyfrowym...",
+"Badanie per rectum literatury...",
+"Zapisujemy zlecenia w systemie...",
+"Podajemy morfinę na deadline...",
+"EKG dokumentu — rytm miarowy...",
+"Sprawdzamy reflexy szablonu...",
+"Transfuzja wiedzy medycznej...",
+"Intubacja danych klinicznych...",
+"Repozycja złamanego formatowania...",
+"Szycie chirurgiczne akapitów...",
+"Zakładamy gips na strukturę...",
+"Podajemy heparynę na przepływ danych...",
+"Defibrylacja szablonu — ładuję 200J...",
+"Resuscytacja dokumentu w toku...",
+"RTG tekstu — szukamy ciał obcych...",
+"USG jamy dokumentowej...",
+"Aseptyka i antyseptyka tekstu...",
+"Nakładamy jałowy opatrunek...",
+"Prześwietlamy dane rentgenem...",
+"Monitor pracy serca AI...",
+"Wenflon do żyły informacyjnej...",
+"Podajemy Paracetamol 1g na nerwy...",
+"Cewnikujemy bazę danych...",
+"Zakładamy sondę żołądkową do danych...",
+"Triage dokumentacyjny — priorytet czerwony...",
+"Wzywamy zespół reanimacyjny tekstu...",
+"Ląduje helikopter z danymi...",
+"Sala operacyjna przygotowana...",
+"Pole operacyjne czyste i suche...",
+"Tamponada krwawienia informacyjnego...",
+"Klipsujemy tętnicę danych...",
+"Koagulacja bipolarowa szczegółów...",
+"Retrakcja tkanek dokumentu...",
+"Preparujemy struktury anatomiczne tekstu...",
+"Identyfikujemy nerwy narracji...",
+"Mobilizujemy jelito dokumentowe...",
+"Appendektomia zbędnych danych...",
+"Cholecystektomia laparoskopowa tekstu...",
+"Zespolenie koniec-do-końca paragrafów...",
+"Hemostaza — sprawdzamy sucho...",
+"Liczymy gaziki informacyjne...",
+"Zamykamy powięź dokumentu...",
+"Szwy skórne na zakończenie...",
+"Opatrunek jałowy na wynik...",
+"Pacjent (dokument) stabilny...",
+"Zlecamy kontrolę za 7 dni...",
+"Przenosimy na salę pooperacyjną...",
+"Dyżurny sprawdza wyniki...",
+"Ordynator zatwierdza dokument...",
+"Raport pielęgniarski gotowy...",
+"Karta gorączkowa wypełniona...",
+"Podajemy płyny i.v. danych...",
+"Bilans płynów dokumentacyjnych...",
+"Dieta papkowata dla tekstu...",
+"Pionizacja dokumentu — wstaje...",
+"Rehabilitacja ruchowa formatowania...",
+"Konsultacja anestezjologiczna AI...",
+"Kwalifikacja do zabiegu pisania...",
+"Zgoda na zabieg dokumentacyjny uzyskana...",
+"Badania przedoperacyjne kompletne...",
+"Grupa krwi tekstu oznaczona...",
+"Próba krzyżowa danych...",
+"Morfologia dokumentu w normie...",
+"Jonogram informacyjny stabilny...",
+"Kreatynina tekstu w normie...",
+"CRP formatowania — podwyższone...",
+"Leukocytoza danych — leczimy...",
+"Hemoglobina narracji optymalna...",
+"Płytki tekstu w normie...",
+"INR dokumentu — 1.0 — idealnie...",
+"Glukoza informacji pod kontrolą...",
+"Lipidogram narracji — sprawdzamy...",
+"TSH dokumentacji — eutyreoza...",
+"PSA tekstu — w normie...",
+"Markery nowotworowe danych (-)...",
+"D-dimery formatowania ujemne...",
+"Troponina dokumentu — nie podwyższona...",
+"ProBNP tekstu — norma...",
+"Gazometria narracji — wyrównana...",
+"Posiew z rany dokumentowej...",
+"Antybiogram danych wrażliwy...",
+"Zmiana antybiotyku na celowany...",
+"Eskalacja leczenia formatowania...",
+"Deeskalacja — tekst się poprawia...",
+"Wypisujemy na leczenie ambulatoryjne...",
+"L4 dla dokumentu — rekonwalescencja...",
+"Skierowanie na badania kontrolne...",
+"Recepta na dalsze leczenie...",
+"Zaświadczenie lekarskie gotowe...",
+"Epikryza w przygotowaniu...",
+"Karta informacyjna leczenia...",
+"Historia choroby kompletna...",
+"Badanie fizykalne bez odchyleń...",
+"Objawy otrzewnowe ujemne...",
+"Objaw Blumberga (-)...",
+"Objaw Murphy'ego (-)...",
+"Objaw Chełmońskiego (-)...",
+"Perystaltyka prawidłowa...",
+"Brzuch miękki niebolesny...",
+"Klatka piersiowa symetryczna...",
+"Szmer pęcherzykowy prawidłowy...",
+"Tony serca czyste głośne...",
+"Obrzęki obwodowe (-)...",
+"Tętno na obwodzie zachowane...",
+"Skóra ciepła sucha...",
+"Węzły chłonne niepowiększone...",
+"Tarczyca niepowiększona...",
+"Źrenice równe reaktywne...",
+"Objawy oponowe ujemne...",
+"Babinski obustronnie (-)...",
+"Siła mięśniowa 5/5...",
+"Czucie zachowane prawidłowo...",
+"Orientacja auto- i allopsychiczna...",
+"Kontakt logiczny zachowany...",
+"Nastrój wyrównany...",
+"Sen prawidłowy...",
+"Apetyt zachowany...",
+"Stolec regularny...",
+"Diureza prawidłowa...",
+"Gojenie rany prawidłowe...",
+"Szwy do zdjęcia za 10 dni...",
+"Dren usunięty — sucho...",
+"Cewnik usunięty — diureza (+)...",
+"Sonda usunięta — toleruje p.o....",
+"Mobilizacja od 1. doby...",
+"Profilaktyka przeciwzakrzepowa...",
+"Osłona żołądka — IPP...",
+"Nawodnienie dożylne...",
+"Antybiotykoprofilaktyka...",
+"Kontrola glikemii co 4h...",
+"Pomiar RR co 6h...",
+"Kontrola temperatury...",
+"Bilans płynów co 24h...",
+"Zmiana opatrunku co 48h...",
+"Konsultacja dietetyczna...",
+"Edukacja pacjenta...",
+"Zgoda na leczenie...",
+"Informacja dla rodziny...",
+"Plan leczenia ustalony...",
+"Zespół multidyscyplinarny...",
+"Komisja lekarska...",
+"Konferencja chirurgiczna...",
+"Raport śródoperacyjny...",
+"Opis zabiegu w przygotowaniu...",
+"Protokół operacyjny...",
+"Lista kontrolna bezpieczeństwa...",
+"Time-out przed cięciem...",
+"Identyfikacja pacjenta ✓...",
+"Strona zabiegu oznaczona ✓...",
+"Zgoda operacyjna ✓...",
+"Krew zabezpieczona ✓...",
+"Instrumentariuszka gotowa...",
+"Asystent przy stole...",
+"Operator myje się...",
+"Pole operacyjne odkazone...",
+"Obłożenie jałowe...",
+"Nacięcie skóry...",
+"Hemostaza bieżąca...",
+"Preparujemy ostrożnie...",
+"Unikamy jatrogennych uszkodzeń...",
+"Identyfikujemy struktury...",
+"Podwiązujemy naczynia...",
+"Materiał do histopatologii...",
+"Liczenie narzędzi — zgadza się...",
+"Zamknięcie warstwowe...",
+"Sterylny opatrunek...",
+"Pacjent wybudzony...",
+"Parametry stabilne...",
+"Transportujemy na oddział...",
+"Monitorowanie pooperacyjne...",
+"Dokument prawie gotowy...",
+"Ostatnie szwy dokumentacyjne...",
+"Kontrola jakości tekstu...",
+"Podpis ordynatora...",
+"Pieczątka lekarska...",
+"Dokument gotowy — drukujemy...",
+"System AMMS zaktualizowany..."
+];
+
+// ════════════════════════════════════════════════════════
+// ICD-10 DATABASE (~1500 codes - most common across specialties)
+// ════════════════════════════════════════════════════════
+const ICD10 = [
+// === CHIRURGIA OGÓLNA ===
+{c:'K35.8',n:'Ostre zapalenie wyrostka robaczkowego, inne'},{c:'K35.9',n:'Ostre zapalenie wyrostka robaczkowego, nieokreślone'},
+{c:'K36',n:'Inne postacie zapalenia wyrostka robaczkowego'},{c:'K37',n:'Zapalenie wyrostka robaczkowego, nieokreślone'},
+{c:'K40.0',n:'Przepuklina pachwinowa obustronna z niedrożnością'},{c:'K40.1',n:'Przepuklina pachwinowa obustronna ze zgorzelem'},
+{c:'K40.2',n:'Przepuklina pachwinowa obustronna bez niedrożności i zgorzeli'},{c:'K40.3',n:'Przepuklina pachwinowa jednostronna z niedrożnością'},
+{c:'K40.4',n:'Przepuklina pachwinowa jednostronna ze zgorzelem'},{c:'K40.9',n:'Przepuklina pachwinowa jednostronna bez powikłań'},
+{c:'K41.9',n:'Przepuklina udowa jednostronna bez powikłań'},{c:'K42.0',n:'Przepuklina pępkowa z niedrożnością'},
+{c:'K42.9',n:'Przepuklina pępkowa bez powikłań'},{c:'K43.0',n:'Przepuklina brzuszna z niedrożnością'},
+{c:'K43.9',n:'Przepuklina brzuszna bez powikłań'},{c:'K44.9',n:'Przepuklina przeponowa bez powikłań'},
+{c:'K56.0',n:'Porażenna niedrożność jelit'},{c:'K56.1',n:'Wgłobienie jelita'},
+{c:'K56.2',n:'Skręt jelita'},{c:'K56.5',n:'Zrosty jelitowe z niedrożnością'},
+{c:'K56.6',n:'Inna i nieokreślona niedrożność jelit'},{c:'K56.7',n:'Niedrożność jelit, nieokreślona'},
+{c:'K57.3',n:'Choroba uchyłkowa jelita grubego z perforacją'},{c:'K57.9',n:'Choroba uchyłkowa jelit, nieokreślona'},
+{c:'K25.0',n:'Wrzód żołądka ostry z krwawieniem'},{c:'K25.4',n:'Wrzód żołądka przewlekły z krwawieniem'},
+{c:'K25.5',n:'Wrzód żołądka przewlekły z perforacją'},{c:'K26.0',n:'Wrzód dwunastnicy ostry z krwawieniem'},
+{c:'K26.5',n:'Wrzód dwunastnicy przewlekły z perforacją'},{c:'K29.7',n:'Zapalenie żołądka, nieokreślone'},
+{c:'K80.0',n:'Kamica pęcherzyka żółciowego z ostrym zapaleniem'},{c:'K80.1',n:'Kamica pęcherzyka żółciowego z innym zapaleniem'},
+{c:'K80.2',n:'Kamica pęcherzyka żółciowego bez zapalenia'},{c:'K80.5',n:'Kamica przewodu żółciowego bez zapalenia'},
+{c:'K81.0',n:'Ostre zapalenie pęcherzyka żółciowego'},{c:'K81.1',n:'Przewlekłe zapalenie pęcherzyka żółciowego'},
+{c:'K83.0',n:'Zapalenie dróg żółciowych'},{c:'K85.0',n:'Idiopatyczne ostre zapalenie trzustki'},
+{c:'K85.1',n:'Żółciowe ostre zapalenie trzustki'},{c:'K85.9',n:'Ostre zapalenie trzustki, nieokreślone'},
+{c:'K86.1',n:'Inne postacie przewlekłego zapalenia trzustki'},{c:'K61.0',n:'Ropień odbytu'},
+{c:'K60.0',n:'Ostra szczelina odbytu'},{c:'K60.2',n:'Szczelina odbytu, nieokreślona'},
+{c:'K62.5',n:'Krwawienie z odbytu i odbytnicy'},{c:'K64.0',n:'Hemoroidy I stopnia'},
+{c:'K64.1',n:'Hemoroidy II stopnia'},{c:'K64.2',n:'Hemoroidy III stopnia'},
+{c:'K64.3',n:'Hemoroidy IV stopnia'},{c:'K64.8',n:'Inne określone hemoroidy'},
+{c:'K92.0',n:'Wymioty krwawe'},{c:'K92.1',n:'Smoliste stolce — melena'},
+{c:'K92.2',n:'Krwawienie z przewodu pokarmowego, nieokreślone'},
+{c:'L02.2',n:'Ropień skóry tułowia'},{c:'L02.4',n:'Ropień skóry kończyny'},
+{c:'L02.9',n:'Ropień skóry, nieokreślony'},{c:'L03.0',n:'Zapalenie tkanki podskórnej palców'},
+{c:'L03.1',n:'Zapalenie tkanki podskórnej kończyny'},{c:'L05.0',n:'Torbiel pilonidalna z ropniem'},
+{c:'L05.9',n:'Torbiel pilonidalna bez ropnia'},{c:'L08.0',n:'Piodermia'},
+{c:'L72.0',n:'Torbiel naskórkowa'},{c:'L72.1',n:'Torbiel gruczołu trójdzielnego'},
+// === NOWOTWORY ===
+{c:'C15.9',n:'Nowotwór złośliwy przełyku, nieokreślony'},{c:'C16.9',n:'Nowotwór złośliwy żołądka, nieokreślony'},
+{c:'C17.9',n:'Nowotwór złośliwy jelita cienkiego, nieokreślony'},{c:'C18.0',n:'Nowotwór złośliwy kątnicy'},
+{c:'C18.2',n:'Nowotwór złośliwy wstępnicy'},{c:'C18.4',n:'Nowotwór złośliwy poprzecznicy'},
+{c:'C18.7',n:'Nowotwór złośliwy esicy'},{c:'C18.9',n:'Nowotwór złośliwy okrężnicy, nieokreślony'},
+{c:'C19',n:'Nowotwór złośliwy zgięcia odbytniczo-esiczego'},{c:'C20',n:'Nowotwór złośliwy odbytnicy'},
+{c:'C22.0',n:'Rak wątrobowokomórkowy'},{c:'C23',n:'Nowotwór złośliwy pęcherzyka żółciowego'},
+{c:'C25.9',n:'Nowotwór złośliwy trzustki, nieokreślony'},{c:'C34.9',n:'Nowotwór złośliwy oskrzela/płuca'},
+{c:'C50.9',n:'Nowotwór złośliwy piersi, nieokreślony'},{c:'C61',n:'Nowotwór złośliwy gruczołu krokowego'},
+{c:'C67.9',n:'Nowotwór złośliwy pęcherza moczowego'},{c:'C73',n:'Nowotwór złośliwy tarczycy'},
+{c:'D12.6',n:'Polip okrężnicy'},{c:'D17.9',n:'Tłuszczak, nieokreślony'},
+// === TRAUMATOLOGIA ===
+{c:'S00.0',n:'Powierzchowny uraz głowy'},{c:'S01.0',n:'Rana głowy'},
+{c:'S02.0',n:'Złamanie sklepienia czaszki'},{c:'S06.0',n:'Wstrząśnienie mózgu'},
+{c:'S06.5',n:'Krwiak podtwardówkowy pourazowy'},{c:'S09.9',n:'Uraz głowy, nieokreślony'},
+{c:'S12.0',n:'Złamanie C1'},{c:'S12.1',n:'Złamanie C2'},
+{c:'S22.3',n:'Złamanie żebra'},{c:'S22.4',n:'Złamanie żeber wielokrotne'},
+{c:'S27.0',n:'Odma opłucnowa pourazowa'},{c:'S27.1',n:'Krwiak opłucnej pourazowy'},
+{c:'S31.1',n:'Rana brzucha'},{c:'S36.1',n:'Uraz wątroby'},
+{c:'S36.0',n:'Uraz śledziony'},{c:'S37.0',n:'Uraz nerki'},
+{c:'S42.0',n:'Złamanie obojczyka'},{c:'S42.2',n:'Złamanie nasady bliższej k. ramiennej'},
+{c:'S42.3',n:'Złamanie trzonu k. ramiennej'},{c:'S42.4',n:'Złamanie nasady dalszej k. ramiennej'},
+{c:'S52.1',n:'Złamanie nasady bliższej k. promieniowej'},{c:'S52.5',n:'Złamanie nasady dalszej k. promieniowej'},
+{c:'S52.6',n:'Złamanie nasady dalszej obu kości przedramienia'},{c:'S52.9',n:'Złamanie przedramienia, nieokreślone'},
+{c:'S62.0',n:'Złamanie kości łódeczkowatej'},{c:'S62.3',n:'Złamanie kości śródręcza'},
+{c:'S62.5',n:'Złamanie kciuka'},{c:'S62.6',n:'Złamanie innego palca ręki'},
+{c:'S72.0',n:'Złamanie szyjki kości udowej'},{c:'S72.1',n:'Złamanie przezkrętarzowe'},
+{c:'S72.3',n:'Złamanie trzonu kości udowej'},{c:'S72.4',n:'Złamanie nasady dalszej k. udowej'},
+{c:'S82.0',n:'Złamanie rzepki'},{c:'S82.1',n:'Złamanie nasady bliższej piszczeli'},
+{c:'S82.2',n:'Złamanie trzonu piszczeli'},{c:'S82.3',n:'Złamanie nasady dalszej piszczeli'},
+{c:'S82.5',n:'Złamanie kostki przyśrodkowej'},{c:'S82.6',n:'Złamanie kostki bocznej'},
+{c:'S82.8',n:'Złamanie obu kostek'},{c:'S83.1',n:'Zwichnięcie kolana'},
+{c:'S83.2',n:'Uszkodzenie łąkotki'},{c:'S83.5',n:'Skręcenie więzadeł krzyżowych kolana'},
+{c:'S86.0',n:'Uraz ścięgna Achillesa'},{c:'S92.0',n:'Złamanie kości piętowej'},
+{c:'S93.4',n:'Skręcenie stawu skokowego'},{c:'T14.0',n:'Rana powierzchowna, nieokreślona'},
+{c:'T14.1',n:'Rana otwarta, nieokreślona'},{c:'T79.3',n:'Pourazowa infekcja rany'},
+{c:'M17.1',n:'Gonartroza pierwotna obustronna'},{c:'M17.9',n:'Gonartroza, nieokreślona'},
+{c:'M16.1',n:'Koksartroza pierwotna obustronna'},{c:'M16.9',n:'Koksartroza, nieokreślona'},
+{c:'M23.2',n:'Uszkodzenie łąkotki stare'},{c:'M23.5',n:'Niestabilność kolana'},
+{c:'M54.5',n:'Ból krzyża'},{c:'M54.4',n:'Rwa kulszowa'},
+// === CHOROBY WEWNĘTRZNE ===
+{c:'I10',n:'Nadciśnienie tętnicze pierwotne'},{c:'I11.0',n:'Choroba nadciśnieniowa serca z niewydolnością'},
+{c:'I20.0',n:'Niestabilna dławica piersiowa'},{c:'I21.0',n:'Ostry zawał ściany przedniej'},
+{c:'I21.9',n:'Ostry zawał mięśnia sercowego, nieokreślony'},{c:'I25.1',n:'Miażdżycowa choroba serca'},
+{c:'I26.0',n:'Zator tętnicy płucnej z sercem płucnym ostrym'},{c:'I26.9',n:'Zator tętnicy płucnej bez serca płucnego'},
+{c:'I48.0',n:'Napadowe migotanie przedsionków'},{c:'I48.1',n:'Przetrwałe migotanie przedsionków'},
+{c:'I48.9',n:'Migotanie przedsionków, nieokreślone'},{c:'I50.0',n:'Zastoinowa niewydolność serca'},
+{c:'I50.9',n:'Niewydolność serca, nieokreślona'},{c:'I63.9',n:'Zawał mózgu, nieokreślony'},
+{c:'I64',n:'Udar mózgu, nieokreślony'},{c:'I70.2',n:'Miażdżyca tętnic kończyn'},
+{c:'I71.3',n:'Tętniak aorty brzusznej, pęknięty'},{c:'I71.4',n:'Tętniak aorty brzusznej, bez pęknięcia'},
+{c:'I73.9',n:'Choroba naczyń obwodowych, nieokreślona'},{c:'I74.3',n:'Zator i zakrzep tętnic kończyn dolnych'},
+{c:'I80.1',n:'Zapalenie żył głębokich kończyny dolnej'},{c:'I80.2',n:'Zapalenie żył kończyny dolnej, nieokreślone'},
+{c:'I83.0',n:'Żylaki kończyn dolnych z owrzodzeniem'},{c:'I83.9',n:'Żylaki kończyn dolnych bez powikłań'},
+{c:'I87.0',n:'Zespół pozakrzepowy'},
+// === ENDOKRYNOLOGIA / METABOLIZM ===
+{c:'E10.9',n:'Cukrzyca insulinozależna bez powikłań'},{c:'E11.9',n:'Cukrzyca insulinoniezależna bez powikłań'},
+{c:'E11.6',n:'Cukrzyca typu 2 z innymi powikłaniami'},{c:'E04.1',n:'Guzek tarczycy pojedynczy'},
+{c:'E04.2',n:'Wole wieloguzkowe nietoksyczne'},{c:'E05.0',n:'Tyreotoksykoza z wolem rozlanym'},
+{c:'E06.3',n:'Autoimmunologiczne zapalenie tarczycy'},{c:'E66.0',n:'Otyłość wywołana nadmiarem kalorii'},
+{c:'E78.0',n:'Hipercholesterolemia'},{c:'E78.5',n:'Hiperlipidemia, nieokreślona'},
+{c:'E87.1',n:'Hiponatremia'},{c:'E87.6',n:'Hipokaliemia'},
+// === PULMONOLOGIA ===
+{c:'J06.9',n:'Ostre zakażenie górnych dróg oddechowych'},{c:'J15.9',n:'Bakteryjne zapalenie płuc, nieokreślone'},
+{c:'J18.0',n:'Odoskrzelowe zapalenie płuc'},{c:'J18.9',n:'Zapalenie płuc, nieokreślone'},
+{c:'J44.0',n:'POChP z ostrym zakażeniem dolnych dróg oddechowych'},{c:'J44.1',n:'POChP z zaostrzeniem'},
+{c:'J45.0',n:'Astma głównie alergiczna'},{c:'J45.9',n:'Astma, nieokreślona'},
+{c:'J90',n:'Wysięk opłucnowy'},{c:'J93.1',n:'Odma opłucnowa samoistna'},
+{c:'J96.0',n:'Ostra niewydolność oddechowa'},
+// === UROLOGIA ===
+{c:'N10',n:'Ostre cewkowo-śródmiąższowe zapalenie nerek'},{c:'N13.2',n:'Wodonercze z niedrożnością'},
+{c:'N20.0',n:'Kamica nerki'},{c:'N20.1',n:'Kamica moczowodu'},
+{c:'N20.9',n:'Kamica moczowa, nieokreślona'},{c:'N23',n:'Kolka nerkowa, nieokreślona'},
+{c:'N30.0',n:'Ostre zapalenie pęcherza moczowego'},{c:'N39.0',n:'Zakażenie dróg moczowych'},
+{c:'N40',n:'Przerost gruczołu krokowego'},{c:'N41.0',n:'Ostre zapalenie gruczołu krokowego'},
+{c:'N43.3',n:'Wodniak jądra, nieokreślony'},{c:'N44.0',n:'Skręt jądra'},
+{c:'N45.9',n:'Zapalenie jądra i najądrza, nieokreślone'},{c:'N47',n:'Nadmierna napletka / stulejka'},
+// === GASTROENTEROLOGIA ===
+{c:'K21.0',n:'Choroba refluksowa z zapaleniem przełyku'},{c:'K25.9',n:'Wrzód żołądka, nieokreślony'},
+{c:'K26.9',n:'Wrzód dwunastnicy, nieokreślony'},{c:'K29.0',n:'Ostre krwotoczne zapalenie żołądka'},
+{c:'K50.9',n:'Choroba Leśniowskiego-Crohna, nieokreślona'},{c:'K51.9',n:'Wrzodziejące zapalenie jelita grubego'},
+{c:'K58.9',n:'Zespół jelita drażliwego'},{c:'K59.0',n:'Zaparcie'},
+{c:'K70.3',n:'Alkoholowa marskość wątroby'},{c:'K74.6',n:'Inna i nieokreślona marskość wątroby'},
+{c:'K76.0',n:'Stłuszczenie wątroby'},{c:'K86.0',n:'Alkoholowe przewlekłe zapalenie trzustki'},
+// === NEUROLOGIA ===
+{c:'G40.9',n:'Padaczka, nieokreślona'},{c:'G43.9',n:'Migrena, nieokreślona'},
+{c:'G45.9',n:'Przejściowy atak niedokrwienny'},{c:'G50.0',n:'Neuralgia trójdzielna'},
+{c:'G56.0',n:'Zespół cieśni nadgarstka'},{c:'G62.9',n:'Polineuropatia, nieokreślona'},
+// === OBJAWY OGÓLNE ===
+{c:'R07.4',n:'Ból w klatce piersiowej, nieokreślony'},{c:'R10.0',n:'Ostry brzuch'},
+{c:'R10.1',n:'Ból nadbrzusza'},{c:'R10.3',n:'Ból podbrzusza'},
+{c:'R10.4',n:'Inne i nieokreślone bóle brzucha'},{c:'R11',n:'Nudności i wymioty'},
+{c:'R17',n:'Żółtaczka nieokreślona'},{c:'R18',n:'Wodobrzusze'},
+{c:'R19.0',n:'Wzdęcie brzucha'},{c:'R20.2',n:'Parestezje'},
+{c:'R31',n:'Krwiomocz'},{c:'R33',n:'Zatrzymanie moczu'},
+{c:'R40.0',n:'Senność'},{c:'R42',n:'Zawroty głowy'},
+{c:'R50.9',n:'Gorączka, nieokreślona'},{c:'R55',n:'Omdlenie i zapaść'},
+{c:'R56.0',n:'Drgawki gorączkowe'},{c:'R59.0',n:'Limfadenopatia zlokalizowana'},
+{c:'R73.0',n:'Hiperglikemia'},{c:'R79.0',n:'Nieprawidłowy wynik badań biochemicznych'},
+// === POWIKŁANIA / STANY PO ===
+{c:'T81.0',n:'Krwawienie i krwiak po zabiegu'},{c:'T81.3',n:'Rozejście rany pooperacyjnej'},
+{c:'T81.4',n:'Zakażenie po zabiegu'},{c:'T88.7',n:'Nieokreślone działanie niepożądane leku'},
+{c:'Z48.0',n:'Opieka nad opatrunkami chirurgicznymi'},{c:'Z48.8',n:'Inna opieka pooperacyjna'},
+{c:'Z96.6',n:'Obecność implantów ortopedycznych'},{c:'Z87.1',n:'Choroby układu pokarmowego w wywiadzie'},
+{c:'Z88.0',n:'Uczulenie na penicylinę w wywiadzie'},
+// === ANEMIA / HEMATOLOGIA ===
+{c:'D50.9',n:'Niedokrwistość z niedoboru żelaza'},{c:'D62',n:'Ostra niedokrwistość pokrwotoczna'},
+{c:'D64.9',n:'Niedokrwistość, nieokreślona'},{c:'D68.3',n:'Zaburzenia krwotoczne — antykoagulanty'},
+{c:'D69.6',n:'Małopłytkowość, nieokreślona'},
+// === ZAKAŻENIA ===
+{c:'A04.7',n:'Zapalenie jelit Clostridium difficile'},{c:'A09.0',n:'Zapalenie żołądka i jelit zakaźne'},
+{c:'A41.9',n:'Posocznica, nieokreślona'},{c:'A46',n:'Róża'},
+{c:'B96.2',n:'Escherichia coli — przyczyna zakażenia'},{c:'B96.8',n:'Inne bakterie — przyczyna zakażenia'},
+// === INNE ===
+{c:'J95.0',n:'Niewydolność tracheostomii'},{c:'N17.9',n:'Ostra niewydolność nerek'},
+{c:'N18.9',n:'Przewlekła choroba nerek, nieokreślona'},{c:'R57.0',n:'Wstrząs kardiogenny'},
+{c:'R57.1',n:'Wstrząs hipowolemiczny'},{c:'R57.8',n:'Inny wstrząs'}
+];
+
+// ════════════════════════════════════════════════════════
+// DRUG DATABASE
+// ════════════════════════════════════════════════════════
+const DRUGS = [
+// Przeciwzakrzepowe
+{n:'Enoxaparin (Clexane)',d:'40mg s.c. 1x/d (profilaktyka) lub 1mg/kg s.c. 2x/d (leczenie)',g:'Przeciwzakrzepowe'},
+{n:'Nadroparin (Fraxiparine)',d:'0.3ml s.c. 1x/d (profilaktyka)',g:'Przeciwzakrzepowe'},
+{n:'Heparin (Heparyna)',d:'5000j s.c. 2-3x/d',g:'Przeciwzakrzepowe'},
+{n:'Rivaroxaban (Xarelto)',d:'10mg p.o. 1x/d',g:'Przeciwzakrzepowe'},
+// Przeciwbólowe
+{n:'Paracetamol',d:'500-1000mg p.o./i.v. co 6-8h (max 4g/d)',g:'Przeciwbólowe'},
+{n:'Metamizol (Pyralgin)',d:'500-1000mg p.o./i.v. co 6-8h',g:'Przeciwbólowe'},
+{n:'Ketoprofen (Ketonal)',d:'100mg i.v./i.m. co 8-12h',g:'Przeciwbólowe / NLPZ'},
+{n:'Ibuprofen',d:'200-400mg p.o. co 6-8h',g:'Przeciwbólowe / NLPZ'},
+{n:'Dexketoprofen (Dexak)',d:'25mg p.o. co 8h lub 50mg i.v.',g:'Przeciwbólowe / NLPZ'},
+{n:'Tramadol',d:'50-100mg p.o./i.v. co 6-8h',g:'Opioidowe'},
+{n:'Morphin (Morfina)',d:'5-10mg s.c./i.v. co 4-6h',g:'Opioidowe'},
+// Naczyniowe
+{n:'Cyklo 3 Fort',d:'1 kaps. 3x/d p.o.',g:'Naczyniowe'},
+{n:'Diosmin (Detralex)',d:'500mg 2x/d lub 1000mg 1x/d p.o.',g:'Naczyniowe'},
+{n:'Aescin (Esceven)',d:'20mg 3x/d p.o.',g:'Przeciwobrzękowe'},
+{n:'Sulodexide (Vessel Due F)',d:'1 kaps. 2x/d p.o.',g:'Naczyniowe'},
+// Mazi / Miejscowe
+{n:'Diclofenac żel (Voltaren)',d:'Miejscowo 3-4x/d',g:'Mazi NLPZ'},
+{n:'Ketoprofen żel (Fastum)',d:'Miejscowo 2-3x/d',g:'Mazi NLPZ'},
+{n:'Heparinum żel',d:'Miejscowo 2-3x/d',g:'Mazi przeciwzakrzepowe'},
+// Hemoroidy
+{n:'Procto-Glyvenol',d:'1 czopek 2x/d lub krem 2x/d',g:'Proktologiczne'},
+{n:'Doxium (Calcium dobesilate)',d:'500mg 2x/d p.o.',g:'Proktologiczne'},
+{n:'Posterisan',d:'Maść / czopki 2x/d',g:'Proktologiczne'},
+// Antybiotyki
+{n:'Amoxicillin/Clavulanate (Augmentin)',d:'625mg p.o. 3x/d lub 1.2g i.v. 3x/d',g:'Antybiotyki'},
+{n:'Cefazolin',d:'1-2g i.v. co 8h',g:'Antybiotyki'},
+{n:'Ceftriaxone (Rocephin)',d:'1-2g i.v. 1x/d',g:'Antybiotyki'},
+{n:'Cefuroxime',d:'750mg-1.5g i.v. co 8h',g:'Antybiotyki'},
+{n:'Metronidazole (Metronidazol)',d:'500mg i.v./p.o. 3x/d',g:'Antybiotyki'},
+{n:'Ciprofloxacin',d:'500mg p.o. 2x/d lub 400mg i.v. 2x/d',g:'Antybiotyki'},
+{n:'Clindamycin (Dalacin)',d:'600mg i.v. 3x/d lub 300mg p.o. 4x/d',g:'Antybiotyki'},
+{n:'Amikacin',d:'15mg/kg i.v. 1x/d',g:'Antybiotyki'},
+{n:'Piperacillin/Tazobactam',d:'4.5g i.v. co 6-8h',g:'Antybiotyki'},
+{n:'Meropenem',d:'1g i.v. co 8h',g:'Antybiotyki'},
+{n:'Vancomycin',d:'1g i.v. co 12h',g:'Antybiotyki'},
+// IPP / żołądek
+{n:'Omeprazole',d:'20-40mg p.o./i.v. 1-2x/d',g:'IPP'},
+{n:'Pantoprazole',d:'40mg p.o./i.v. 1-2x/d',g:'IPP'},
+{n:'Esomeprazole (Nexium)',d:'20-40mg p.o. 1x/d',g:'IPP'},
+// Przeciwwymiotne
+{n:'Ondansetron (Zofran)',d:'4-8mg i.v. co 8h',g:'Przeciwwymiotne'},
+{n:'Metoclopramide',d:'10mg i.v./p.o. 3x/d',g:'Przeciwwymiotne'},
+// Płyny
+{n:'NaCl 0.9%',d:'500-1000ml i.v.',g:'Płyny'},
+{n:'Ringer Lactate',d:'500-1000ml i.v.',g:'Płyny'},
+{n:'Glukoza 5%',d:'500ml i.v.',g:'Płyny'},
+{n:'PWE (Płyn wieloelektrolitowy)',d:'500-1000ml i.v.',g:'Płyny'},
+// Kardiologia
+{n:'Bisoprolol',d:'2.5-10mg p.o. 1x/d',g:'Beta-blokery'},
+{n:'Metoprolol',d:'25-100mg p.o. 2x/d',g:'Beta-blokery'},
+{n:'Amlodipine',d:'5-10mg p.o. 1x/d',g:'Blokery kanału Ca'},
+{n:'Ramipril',d:'2.5-10mg p.o. 1x/d',g:'ACE-I'},
+{n:'Perindopril',d:'4-8mg p.o. 1x/d',g:'ACE-I'},
+{n:'Valsartan',d:'80-160mg p.o. 1x/d',g:'ARB'},
+{n:'Furosemide',d:'20-80mg p.o./i.v. 1-2x/d',g:'Diuretyki'},
+{n:'Spironolactone',d:'25-100mg p.o. 1x/d',g:'Diuretyki'},
+{n:'Atorvastatin',d:'20-80mg p.o. wieczorem',g:'Statyny'},
+{n:'Rosuvastatin',d:'10-20mg p.o. wieczorem',g:'Statyny'},
+{n:'Aspirin (ASA)',d:'75-100mg p.o. 1x/d',g:'Przeciwpłytkowe'},
+{n:'Clopidogrel',d:'75mg p.o. 1x/d',g:'Przeciwpłytkowe'},
+// Cukrzyca
+{n:'Metformin',d:'500-1000mg p.o. 2x/d',g:'Cukrzyca'},
+{n:'Insulin Actrapid',d:'Wg schematu j.m. s.c.',g:'Insuliny'},
+{n:'Insulin Lantus',d:'Wg dawki j.m. s.c. 1x/d',g:'Insuliny'},
+// Inne
+{n:'Pregabalin (Lyrica)',d:'75-150mg p.o. 2x/d',g:'Neuropatia'},
+{n:'Gabapentin',d:'300-900mg p.o. 3x/d',g:'Neuropatia'},
+{n:'Lactulose',d:'15-30ml p.o. 1-3x/d',g:'Przeczyszczające'},
+{n:'Loperamide',d:'2-4mg p.o. (max 16mg/d)',g:'Przeciwbiegunkowe'},
+{n:'Diazepam',d:'5-10mg p.o./i.v.',g:'Sedacja'},
+{n:'Midazolam',d:'1-5mg i.v.',g:'Sedacja'},
+{n:'Fluconazole',d:'100-400mg p.o./i.v. 1x/d',g:'Przeciwgrzybicze'},
+{n:'Iron (Żelazo)',d:'100mg p.o. 1-2x/d',g:'Suplementy'}
+];
+
+// ════════════════════════════════════════════════════════
+// RADIO STATIONS
+// ════════════════════════════════════════════════════════
+const RADIO = [
+  {name:'RMF FM', url:'https://rs6-krk2.rmfstream.pl/rmf_fm'},
+  {name:'Radio Zet', url:'https://zt.radiostream.pl/zet-net.mp3'},
+  {name:'Trójka PR', url:'https://stream3.polskieradio.pl:8904/'},
+  {name:'Chillizet', url:'https://ch.radiostream.pl/chillizet.mp3'},
+  {name:'Radio Gdańsk', url:'https://stream3.nadaje.com:9112/radiogdansk'},
+  {name:'RMF MAXX', url:'https://rs201-krk2.rmfstream.pl/RMFMAXXX48'}
+];
+let radioIdx = 0;
+let radioPlaying = false;
+
+// ════════════════════════════════════════════════════════
+// THEME & CLOCK
+// ════════════════════════════════════════════════════════
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('btnLight').classList.toggle('active', t==='light');
+  document.getElementById('btnDark').classList.toggle('active', t==='dark');
+  localStorage.setItem('chirurg_theme', t);
+}
+function updateClock() {
+  const now = new Date();
+  document.getElementById('currentTime').textContent = now.toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+updateClock(); setInterval(updateClock, 10000);
+
+// Load saved theme
+const savedTheme = localStorage.getItem('chirurg_theme') || 'light';
+setTheme(savedTheme);
+
+// ════════════════════════════════════════════════════════
+// VOICE LANGUAGE
+// ════════════════════════════════════════════════════════
+function setVoiceLang(lang) {
+  voiceLang = lang;
+  document.getElementById('langPL').classList.toggle('active', lang==='pl-PL');
+  document.getElementById('langRU').classList.toggle('active', lang==='ru-RU');
+}
+
+// ════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════════════════
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  currentTab = tab;
+  // Hide generate button on notatki
+  document.getElementById('bottomBar').style.display = tab==='notatki' ? 'none' : 'flex';
+  // Auto-save draft
+  saveDraft();
+}
+
+// ════════════════════════════════════════════════════════
+// BMI CALCULATOR
+// ════════════════════════════════════════════════════════
+function calcBMI() {
+  const h = parseFloat(document.getElementById('p_height')?.value);
+  const w = parseFloat(document.getElementById('p_weight')?.value);
+  const el = document.getElementById('bmiDisplay');
+  if (h > 0 && w > 0) {
+    const bmi = (w / ((h/100)**2)).toFixed(1);
+    let cat = 'Norma';
+    if (bmi < 18.5) cat = 'Niedowaga';
+    else if (bmi >= 25 && bmi < 30) cat = 'Nadwaga';
+    else if (bmi >= 30) cat = 'Otyłość';
+    el.innerHTML = `<span class="bmi-result">BMI: ${bmi}</span> <span class="bmi-category">${cat}</span>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// ICD-10 SEARCH
+// ════════════════════════════════════════════════════════
+function searchICD(val, prefix) {
+  const drop = document.getElementById('icdDrop_'+prefix);
+  if (!val || val.length < 2) { drop.classList.remove('open'); return; }
+  const q = val.toLowerCase();
+  const results = ICD10.filter(i => i.c.toLowerCase().includes(q) || i.n.toLowerCase().includes(q)).slice(0,10);
+  if (!results.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = results.map(r =>
+    `<div class="icd-item" onclick="selectICD('${prefix}','${r.c}','${r.n.replace(/'/g,"\\'")}')">
+      <span class="icd-code">${r.c}</span><span class="icd-name">${r.n}</span>
+    </div>`).join('');
+  drop.classList.add('open');
+}
+function selectICD(prefix, code, name) {
+  const diagMap = {w:'w_diag',a:'a_diag',k:'k_diag',z:'z_diag'};
+  const codeMap = {w:'w_icd_code',a:'a_icd_code',k:'k_icd_code',z:'z_icd_code'};
+  document.getElementById(diagMap[prefix]).value = name;
+  document.getElementById(codeMap[prefix]).value = code;
+  document.getElementById('icdDrop_'+prefix).classList.remove('open');
+}
+// Close dropdowns on click outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.icd-wrap')) document.querySelectorAll('.icd-dropdown').forEach(d => d.classList.remove('open'));
+  if (!e.target.closest('.drug-dropdown') && !e.target.closest('[oninput*="searchDrug"]')) document.querySelectorAll('.drug-dropdown').forEach(d => d.classList.remove('open'));
+});
+
+// AI ICD lookup
+async function aiICD(diagId, codeId) {
+  const val = document.getElementById(diagId)?.value.trim();
+  if (!val || val.length < 3) { showToast('Wpisz rozpoznanie','error'); return; }
+  showLoader('Szukam kodu ICD-10...');
+  try {
+    const r = await fetch(WEBHOOKS.icd, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'get_icd_code', diagnosis:val}),
+      signal: abortAfter(30000)
+    });
+    const res = await r.json(); hideLoader();
+    if (res.success && res.code) {
+      document.getElementById(codeId).value = res.code;
+      document.getElementById(diagId).value = res.name || val;
+      showToast(`${res.code} — ${res.name}`,'success');
+    } else showToast('Nie znaleziono kodu','error');
+  } catch(e) { hideLoader(); showToast('Błąd: '+e.message,'error'); }
+}
+
+// ════════════════════════════════════════════════════════
+// DRUG SEARCH
+// ════════════════════════════════════════════════════════
+function searchDrug(val, prefix) {
+  const drop = document.getElementById('drugDrop_'+prefix);
+  if (!val || val.length < 2) { drop.classList.remove('open'); return; }
+  const q = val.toLowerCase();
+  const results = DRUGS.filter(d => d.n.toLowerCase().includes(q) || d.g.toLowerCase().includes(q)).slice(0,8);
+  if (!results.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = results.map(r =>
+    `<div class="drug-item" onclick="selectDrug('${prefix}','${r.n.replace(/'/g,"\\'")}','${r.d.replace(/'/g,"\\'")}')">
+      <div class="drug-name">${r.n}</div><div class="drug-dose">${r.d}</div>
+    </div>`).join('');
+  drop.classList.add('open');
+}
+function selectDrug(prefix, name, dose) {
+  const field = document.getElementById('z_meds');
+  const current = field.value.trim();
+  field.value = current ? current + '\n' + name + ' — ' + dose : name + ' — ' + dose;
+  document.getElementById('drugDrop_'+prefix).classList.remove('open');
+}
+
+// ════════════════════════════════════════════════════════
+// PHOTO HANDLING
+// ════════════════════════════════════════════════════════
+const photoStore = {};
+function takePhoto(tab) { document.getElementById('cameraInput_'+tab).click(); }
+function addPhoto(tab) { document.getElementById('photoInput_'+tab).click(); }
+function previewPhotos(input, tab) {
+  if (!photoStore[tab]) photoStore[tab] = [];
+  const container = document.getElementById('previews_'+tab);
+  const pType = document.getElementById('photoType_'+tab)?.value || 'inne';
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      photoStore[tab].push({name:file.name, data:e.target.result, type:pType});
+      const wrap = document.createElement('div'); wrap.className='photo-thumb-wrap';
+      const idx = photoStore[tab].length - 1;
+      wrap.innerHTML = `<img src="${e.target.result}" class="photo-thumb"><div class="photo-badge">${pType}</div><button class="photo-remove" onclick="removePhoto('${tab}',${idx},this.parentNode)">×</button>`;
+      container.appendChild(wrap);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+function removePhoto(tab, idx, el) { photoStore[tab].splice(idx,1); el.remove(); }
+
+// Drag and drop
+document.querySelectorAll('.photo-dropzone').forEach(zone => {
+  const tab = zone.id.replace('dropzone_','');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      const input = document.getElementById('photoInput_'+tab);
+      input.files = e.dataTransfer.files;
+      previewPhotos(input, tab);
+    }
+  });
+});
+
+// ════════════════════════════════════════════════════════
+// VOICE — MAIN DICTATION + PER-FIELD MIC
+// ════════════════════════════════════════════════════════
+const recState = {};
+function toggleMainVoice(tab) {
+  const fieldMap = {przyjecie:'p_voice_text',wypis:'w_voice_text',ambulatorium:'a_voice_text',konsultacja:'k_voice_text',zalecenia:'z_voice_text'};
+  const fieldId = fieldMap[tab];
+  if (!fieldId) return;
+  startWhisperRecording(fieldId);
+}
+
+function micField(fieldId) {
+  startWhisperRecording(fieldId);
+}
+
+// ═══════════════════════════════════════════════════════
+// WHISPER VOICE RECORDING (replaces Web Speech API)
+// ═══════════════════════════════════════════════════════
+let activeRecorder = null;
+let activeFieldId = null;
+
+async function startWhisperRecording(fieldId) {
+  // If already recording — stop and send
+  if (activeRecorder && activeRecorder.state === 'recording') {
+    activeRecorder.stop();
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    const chunks = [];
+
+    activeRecorder = mediaRecorder;
+    activeFieldId = fieldId;
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunks, { type: 'audio/webm' });
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result;
+        showToast('Transkrypcja...', 'info');
+
+        try {
+          const r = await fetch(WEBHOOKS.voice, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              audio: base64,
+              language: voiceLang === 'ru-RU' ? 'ru' : 'pl'
+            }),
+            signal: abortAfter(30000)
+          });
+          const res = await r.json();
+          if (res.success && res.text) {
+            const field = document.getElementById(activeFieldId);
+            if (field) {
+              field.value = field.value ? field.value + ' ' + res.text : res.text;
+            }
+            showToast('Dyktando zapisane ✓', 'success');
+          } else {
+            showToast(res.error || 'Błąd transkrypcji', 'error');
+          }
+        } catch (e) {
+          showToast('Błąd połączenia: ' + e.message, 'error');
+        }
+      };
+      reader.readAsDataURL(blob);
+
+      // Reset UI
+      document.querySelectorAll('.btn-voice').forEach(b => {
+        b.classList.remove('recording');
+        b.textContent = b.textContent.replace('⏹', '🎤');
+      });
+      activeRecorder = null;
+      activeFieldId = null;
+    };
+
+    mediaRecorder.start();
+
+    // Update UI — show recording state
+    showToast('Nagrywanie... kliknij ponownie aby zakończyć', 'info');
+    // Find the button that triggered this
+    document.querySelectorAll('.btn-voice').forEach(b => {
+      if (b.onclick && b.onclick.toString().includes(fieldId)) {
+        b.classList.add('recording');
+        b.textContent = b.textContent.replace('🎤', '⏹');
+      }
+    });
+
+    // Auto-stop after 60 seconds
+    setTimeout(() => {
+      if (activeRecorder && activeRecorder.state === 'recording') {
+        activeRecorder.stop();
+        showToast('Nagrywanie zakończone (limit 60s)', 'info');
+      }
+    }, 60000);
+
+  } catch (e) {
+    showToast('Brak dostępu do mikrofonu', 'error');
+  }
+}
+
+function collectData() {
+  const g = id => document.getElementById(id)?.value || '';
+  const tab = currentTab;
+  const maps = {
+    przyjecie: {reason:g('p_reason'),mode:g('p_mode'),sor:g('p_sor'),gender:g('p_gender'),chronic:g('p_chronic'),meds:g('p_meds'),allergy:g('p_allergy'),habits:g('p_habits'),rr:g('p_rr'),hr:g('p_hr'),temp:g('p_temp'),spo2:g('p_spo2'),height:g('p_height'),weight:g('p_weight'),voice_text:g('p_voice_text')},
+    wypis: {admit:g('w_admit'),discharge:g('w_discharge'),diagnosis:g('w_diag'),icd_code:g('w_icd_code'),mode:g('w_mode'),voice_text:g('w_voice_text')},
+    ambulatorium: {complaint:g('a_complaint'),diagnosis:g('a_diag'),icd_code:g('a_icd_code'),rr:g('a_rr'),hr:g('a_hr'),temp:g('a_temp'),spo2:g('a_spo2'),voice_text:g('a_voice_text')},
+    konsultacja: {specialty:g('k_specialty'),from:g('k_from'),reason:g('k_reason'),diagnosis:g('k_diag'),icd_code:g('k_icd_code'),voice_text:g('k_voice_text')},
+    zalecenia: {diagnosis:g('z_diag'),icd_code:g('z_icd_code'),meds:g('z_meds'),voice_text:g('z_voice_text')}
+  };
+  return maps[tab] || {};
+}
+
+// ════════════════════════════════════════════════════════
+// GENERATE DOCUMENT
+// ════════════════════════════════════════════════════════
+async function generate() {
+  if (currentTab === 'notatki') return;
+  const data = collectData();
+  const photoObjects = (photoStore[currentTab]||[]).map(p=>({data:p.data,type:p.type||'inne'}));
+  const specialty = currentTab==='konsultacja' ? (document.getElementById('k_specialty')?.value||'chirurgiczna') : 'chirurgiczna';
+  
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  showLoader();
+  
+  // Start humor rotation
+  let humorInterval = setInterval(() => {
+    document.getElementById('loaderHumor').textContent = HUMOR[Math.floor(Math.random()*HUMOR.length)];
+  }, 2500);
+  document.getElementById('loaderHumor').textContent = HUMOR[Math.floor(Math.random()*HUMOR.length)];
+
+  try {
+    const r = await fetch(WEBHOOKS.document, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action:'generate_document', tab:currentTab,
+        document_type:tabNames[currentTab],
+        data, photos:photoObjects, specialty,
+        doctor:DOCTOR
+      }),
+      signal: abortAfter(180000)
+    });
+    const res = await r.json();
+    clearInterval(humorInterval); hideLoader(); btn.disabled = false;
+    if (res.success && res.document) {
+      showResult(res.document, currentTab);
+      updateTodayCount(1);
+      if(navigator.vibrate)navigator.vibrate(200);
+      showToast('Dokument wygenerowany ✓','success');
+    } else showToast(res.error||'Błąd generowania','error');
+  } catch(e) {
+    clearInterval(humorInterval); hideLoader(); btn.disabled = false;
+    showToast('Błąd połączenia: '+e.message,'error');
+  }
+}
+
+function abortAfter(ms) {
+  const ac = new AbortController();
+  setTimeout(() => ac.abort(), ms);
+  return ac.signal;
+}
+
+// ════════════════════════════════════════════════════════
+// RESULT DISPLAY
+// ════════════════════════════════════════════════════════
+let currentDocType = '';
+function showResult(text, tab) {
+  currentDocType = tab;
+  document.getElementById('resultText').value = text;
+  document.getElementById('resultBadge').textContent = tabNames[tab]||'Dokument';
+  document.getElementById('resultMeta').textContent = new Date().toLocaleString('pl-PL') + ' · ' + (tabNames[tab]||'');
+  updateCharCount();
+  document.getElementById('resultOverlay').classList.add('visible');
+}
+function closeResult() { document.getElementById('resultOverlay').classList.remove('visible'); }
+function updateCharCount() {
+  document.getElementById('charCount').textContent = document.getElementById('resultText').value.length.toLocaleString('pl-PL')+' znaków';
+}
+document.getElementById('resultText').addEventListener('input', updateCharCount);
+
+function copyResult() {
+  navigator.clipboard.writeText(document.getElementById('resultText').value)
+    .then(() => showToast('Skopiowano do schowka ✓','success'))
+    .catch(() => showToast('Błąd kopiowania','error'));
+}
+
+// ════════════════════════════════════════════════════════
+// PDF & DOCX DOWNLOAD
+// ════════════════════════════════════════════════════════
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm',format:'a4'});
+  const text = document.getElementById('resultText').value;
+  const title = tabNames[currentDocType]||'Dokument';
+  const today = new Date().toLocaleDateString('pl-PL');
+  doc.setFillColor(46,107,138); doc.rect(0,0,210,18,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('ODDZIAŁ CHIRURGII OGÓLNEJ',15,8);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text(DOCTOR,15,13);
+  doc.text(today,195,11,{align:'right'});
+  doc.setTextColor(30,50,80); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(title.toUpperCase(),105,28,{align:'center'});
+  doc.setDrawColor(58,125,92); doc.setLineWidth(0.5); doc.line(15,31,195,31);
+  doc.setTextColor(30,30,30); doc.setFontSize(10); doc.setFont('helvetica','normal');
+  const lines = doc.splitTextToSize(text,175); let y=38;
+  lines.forEach(line => { if(y>275){doc.addPage();y=20;} doc.text(line,15,y); y+=5.5; });
+  const pageCount = doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150);doc.text(`Strona ${i}/${pageCount}`,195,290,{align:'right'});}
+  doc.save(`${currentDocType}_${today.replace(/\./g,'-')}.pdf`);
+  showToast('PDF pobrany ✓','success');
+}
+
+function downloadDOCX() {
+  const text = document.getElementById('resultText').value;
+  const title = tabNames[currentDocType]||'Dokument';
+  const today = new Date().toLocaleDateString('pl-PL');
+  const htmlDoc = `<!DOCTYPE html><html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"><style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.6;margin:2.5cm}.hdr{border-bottom:2px solid #2E6B8A;padding-bottom:8px;margin-bottom:16px}h2{font-size:14pt;text-align:center;margin:16px 0}pre{font-family:'Times New Roman',serif;white-space:pre-wrap;font-size:11pt;line-height:1.7}
+/* ═══ MOBILE OVERRIDES ═══ */
+@media(max-width:768px) {
+  header { height:52px; padding:0 12px; gap:10px; }
+  .logo-text { font-size:14px; }
+  .logo-sub { font-size:9px; }
+  .logo-icon { width:30px; height:30px; font-size:15px; }
+  .tabs-wrap { padding:0 8px; }
+  .tab { padding:10px 12px; font-size:11px; }
+  main { padding:12px; padding-bottom:110px; max-width:100%; }
+  .card { padding:14px; margin-bottom:10px; }
+  .card-title { font-size:10px; margin-bottom:10px; }
+  .form-grid, .form-grid-3 { grid-template-columns:1fr; gap:10px; }
+  .bottom-bar { padding:8px 12px calc(8px + env(safe-area-inset-bottom)); gap:8px; }
+  .btn-generate { padding:12px 20px; font-size:14px; }
+  .btn-history { padding:12px 16px; font-size:13px; }
+  .btn-clear { padding:8px 12px; font-size:11px; }
+  .history-panel { width:100%; max-width:100%; }
+  .result-modal { border-radius:12px; }
+  .radio-bar { bottom:62px; left:8px; padding:6px 10px; font-size:10px; }
+  .photo-controls { gap:6px; }
+  .btn-photo { padding:8px 12px; font-size:11px; }
+  .photo-type-select { max-width:120px; font-size:12px; }
+  .stats-badge { font-size:10px; padding:3px 8px; }
+  .header-controls { gap:4px; }
+  .theme-btn, .lang-btn { padding:4px 8px; font-size:11px; }
+  .toast { bottom:72px; left:12px; right:12px; }
+}
+</style></head><body><div class="hdr"><b>ODDZIAŁ CHIRURGII OGÓLNEJ</b> · ${DOCTOR} · ${today}</div><h2>${title.toUpperCase()}</h2><pre>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</pre></body></html>`;
+  const blob = new Blob(['\ufeff'+htmlDoc],{type:'application/msword;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`${currentDocType}_${today.replace(/\./g,'-')}.doc`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('DOCX pobrany ✓','success');
+}
+
+// ════════════════════════════════════════════════════════
+// HISTORIA
+// ════════════════════════════════════════════════════════
+let historyData = [];
+let historyFilter = 'all';
+function openHistory() {
+  document.getElementById('historyOverlay').classList.add('visible');
+  loadHistory();
+}
+function closeHistory() {
+  document.getElementById('historyOverlay').classList.remove('visible');
+}
+async function loadHistory() {
+  try {
+    const r = await fetch(WEBHOOKS.history, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'get_history'}),
+      signal: abortAfter(15000)
+    });
+    const res = await r.json();
+    if (res.success) {
+      historyData = res.history || [];
+      renderHistory();
+    } else {
+      showToast('Brak danych historii','info');
+      renderHistory();
+    }
+  } catch(e) { showToast('Błąd ładowania historii','error'); }
+}
+function filterHistory(type, btn) {
+  historyFilter = type;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  const filtered = historyFilter==='all' ? historyData : historyData.filter(h => h.tab===historyFilter);
+  if (!filtered.length) {
+    el.innerHTML = '<div class="history-empty">Brak dokumentów w historii</div>';
+    return;
+  }
+  el.innerHTML = filtered.map((h,i) =>
+    `<div class="history-item" onclick="showHistoryItem(${i})">
+      <div class="history-item-date">${h.generated_at||''}</div>
+      <span class="history-item-type">${h.doc_type||h.tab||''}</span>
+      <div class="history-item-preview">${(h.document||'').substring(0,120)}...</div>
+    </div>`).join('');
+}
+function showHistoryItem(idx) {
+  const h = historyData[idx];
+  if (h) {
+    showResult(h.document||'', h.tab||'');
+    closeHistory();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// LOADER & TOAST
+// ════════════════════════════════════════════════════════
+function showLoader(msg) {
+  document.getElementById('loaderText').textContent = msg||'Generowanie dokumentu...';
+  document.getElementById('loader').classList.add('visible');
+}
+function hideLoader() { document.getElementById('loader').classList.remove('visible'); }
+
+let toastTimeout;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = (type==='success'?'✓ ':type==='error'?'✕ ':'ℹ ')+msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ════════════════════════════════════════════════════════
+// TODAY COUNT
+// ════════════════════════════════════════════════════════
+function updateTodayCount(add) {
+  const key = 'chirurg_today_'+new Date().toISOString().split('T')[0];
+  let count = parseInt(localStorage.getItem(key)||'0');
+  if (add) { count += add; localStorage.setItem(key, count); }
+  document.getElementById('todayCount').textContent = `Dziś: ${count} dok.`;
+}
+updateTodayCount(0);
+
+// ════════════════════════════════════════════════════════
+// CLEAR FORM
+// ════════════════════════════════════════════════════════
+function clearForm() {
+  const panel = document.getElementById('panel-'+currentTab);
+  if (panel) {
+    panel.querySelectorAll('input[type=text],input[type=number],textarea').forEach(el => {
+      if (!el.readOnly) el.value = '';
+    });
+    panel.querySelectorAll('select').forEach(el => el.selectedIndex=0);
+    if (photoStore[currentTab]) { photoStore[currentTab] = []; }
+    const previews = document.getElementById('previews_'+currentTab);
+    if (previews) previews.innerHTML = '';
+    document.getElementById('bmiDisplay') && (document.getElementById('bmiDisplay').innerHTML = '');
+  }
+  showToast('Formularz wyczyszczony','info');
+}
+
+// ════════════════════════════════════════════════════════
+// RADIO PLAYER
+// ════════════════════════════════════════════════════════
+function toggleRadio() {
+  const audio = document.getElementById('radioAudio');
+  if (radioPlaying) {
+    audio.pause(); radioPlaying = false;
+    document.getElementById('radioToggle').textContent = '▶';
+    document.getElementById('radioToggle').classList.remove('playing');
+    document.getElementById('radioEq').classList.add('paused');
+  } else {
+    audio.src = RADIO[radioIdx].url;
+    audio.play().then(() => {
+      radioPlaying = true;
+      document.getElementById('radioToggle').textContent = '⏸';
+      document.getElementById('radioToggle').classList.add('playing');
+      document.getElementById('radioEq').classList.remove('paused');
+    }).catch(() => {
+      showToast('Stacja niedostępna — próbuję następną...','info');
+      radioIdx = (radioIdx+1)%RADIO.length;
+      document.getElementById('radioName').textContent = RADIO[radioIdx].name;
+      audio.src = RADIO[radioIdx].url;
+      audio.play().then(() => {
+        radioPlaying = true;
+        document.getElementById('radioToggle').textContent = '⏸';
+        document.getElementById('radioToggle').classList.add('playing');
+        document.getElementById('radioEq').classList.remove('paused');
+      }).catch(() => showToast('Brak dostępnych stacji','error'));
+    });
+  }
+}
+function nextStation() {
+  radioIdx = (radioIdx+1)%RADIO.length;
+  document.getElementById('radioName').textContent = RADIO[radioIdx].name;
+  if (radioPlaying) {
+    const audio = document.getElementById('radioAudio');
+    audio.src = RADIO[radioIdx].url;
+    audio.play().catch(()=>{});
+  }
+}
+function prevStation() {
+  radioIdx = (radioIdx-1+RADIO.length)%RADIO.length;
+  document.getElementById('radioName').textContent = RADIO[radioIdx].name;
+  if (radioPlaying) {
+    const audio = document.getElementById('radioAudio');
+    audio.src = RADIO[radioIdx].url;
+    audio.play().catch(()=>{});
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// NOTES — AUTO-SAVE TO LOCALSTORAGE
+// ════════════════════════════════════════════════════════
+function saveNotes() {
+  localStorage.setItem('chirurg_notes', document.getElementById('notesArea').value);
+  document.getElementById('notesSaved').textContent = 'Zapisano automatycznie · '+new Date().toLocaleTimeString('pl-PL');
+}
+// Load notes
+document.addEventListener('DOMContentLoaded', () => {
+  const notes = localStorage.getItem('chirurg_notes');
+  if (notes) document.getElementById('notesArea').value = notes;
+  // Set date fields
+  const today = new Date();
+  const todayPL = today.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'});
+  ['w_discharge'].forEach(id => { const el=document.getElementById(id); if(el && !el.value) el.value=todayPL; });
+});
+
+// ════════════════════════════════════════════════════════
+// AUTO-SAVE DRAFT TO LOCALSTORAGE
+// ════════════════════════════════════════════════════════
+function saveDraft() {
+  // Simple draft save — just voice texts
+  const draft = {};
+  ['p_voice_text','w_voice_text','a_voice_text','k_voice_text','z_voice_text'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value) draft[id] = el.value;
+  });
+  localStorage.setItem('chirurg_draft', JSON.stringify(draft));
+}
+function loadDraft() {
+  try {
+    const draft = JSON.parse(localStorage.getItem('chirurg_draft')||'{}');
+    Object.entries(draft).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+  } catch(e) {}
+}
+loadDraft();
+
+// ════════════════════════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw-v2.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
