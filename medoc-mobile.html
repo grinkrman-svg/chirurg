@@ -6,6 +6,7 @@
 <title>Chirurg Mobile — Szpital Chojnice</title>
 <link rel="manifest" href="manifest-v2.json">
 <meta name="theme-color" content="#2E6B8A">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Chirurg">
@@ -1099,11 +1100,9 @@ select { cursor: pointer; padding-right: 14px; }
       <button class="btn-photo" onclick="takePhoto('przyjecie')">📷 Zdjęcie</button>
       <button class="btn-photo" onclick="addPhoto('przyjecie')">📁 Galeria</button>
     </div>
-    <div class="photo-dropzone" id="dropzone_przyjecie" onclick="addPhoto('przyjecie')">
-      📂 Przeciągnij zdjęcia tutaj lub kliknij
-    </div>
-    <input type="file" id="photoInput_przyjecie" accept="image/*" multiple style="display:none"
-    <input type="file" id="cameraInput_przyjecie" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'przyjecie')"> onchange="previewPhotos(this,'przyjecie')">
+    <div class="photo-dropzone" id="dropzone_przyjecie" onclick="addPhoto('przyjecie')" style="display:none"></div>
+    <input type="file" id="photoInput_przyjecie" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'przyjecie')">
+    <input type="file" id="cameraInput_przyjecie" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'przyjecie')">
     <div class="photo-previews" id="previews_przyjecie"></div>
   </div>
 </div>
@@ -1140,9 +1139,9 @@ select { cursor: pointer; padding-right: 14px; }
       <button class="btn-photo" onclick="takePhoto('wypis')">📷 Zdjęcie</button>
       <button class="btn-photo" onclick="addPhoto('wypis')">📁 Galeria</button>
     </div>
-    <div class="photo-dropzone" id="dropzone_wypis" onclick="addPhoto('wypis')">📂 Przeciągnij zdjęcia tutaj</div>
-    <input type="file" id="photoInput_wypis" accept="image/*" multiple style="display:none"
-    <input type="file" id="cameraInput_wypis" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'wypis')"> onchange="previewPhotos(this,'wypis')">
+    <div class="photo-dropzone" id="dropzone_wypis" onclick="addPhoto('wypis')" style="display:none"></div>
+    <input type="file" id="photoInput_wypis" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'wypis')">
+    <input type="file" id="cameraInput_wypis" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'wypis')">
     <div class="photo-previews" id="previews_wypis"></div>
   </div>
 </div>
@@ -1186,9 +1185,9 @@ select { cursor: pointer; padding-right: 14px; }
       <button class="btn-photo" onclick="takePhoto('ambulatorium')">📷 Zdjęcie</button>
       <button class="btn-photo" onclick="addPhoto('ambulatorium')">📁 Galeria</button>
     </div>
-    <div class="photo-dropzone" id="dropzone_ambulatorium" onclick="addPhoto('ambulatorium')">📂 Przeciągnij zdjęcia tutaj</div>
-    <input type="file" id="photoInput_ambulatorium" accept="image/*" multiple style="display:none"
-    <input type="file" id="cameraInput_ambulatorium" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'ambulatorium')"> onchange="previewPhotos(this,'ambulatorium')">
+    <div class="photo-dropzone" id="dropzone_ambulatorium" onclick="addPhoto('ambulatorium')" style="display:none"></div>
+    <input type="file" id="photoInput_ambulatorium" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'ambulatorium')">
+    <input type="file" id="cameraInput_ambulatorium" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'ambulatorium')">
     <div class="photo-previews" id="previews_ambulatorium"></div>
   </div>
 </div>
@@ -1233,9 +1232,9 @@ select { cursor: pointer; padding-right: 14px; }
       <button class="btn-photo" onclick="takePhoto('konsultacja')">📷 Zdjęcie</button>
       <button class="btn-photo" onclick="addPhoto('konsultacja')">📁 Galeria</button>
     </div>
-    <div class="photo-dropzone" id="dropzone_konsultacja" onclick="addPhoto('konsultacja')">📂 Przeciągnij zdjęcia tutaj</div>
-    <input type="file" id="photoInput_konsultacja" accept="image/*" multiple style="display:none"
-    <input type="file" id="cameraInput_konsultacja" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'konsultacja')"> onchange="previewPhotos(this,'konsultacja')">
+    <div class="photo-dropzone" id="dropzone_konsultacja" onclick="addPhoto('konsultacja')" style="display:none"></div>
+    <input type="file" id="photoInput_konsultacja" accept="image/*" multiple style="display:none" onchange="previewPhotos(this,'konsultacja')">
+    <input type="file" id="cameraInput_konsultacja" accept="image/*" capture="environment" style="display:none" onchange="previewPhotos(this,'konsultacja')">
     <div class="photo-previews" id="previews_konsultacja"></div>
   </div>
 </div>
@@ -1308,7 +1307,15 @@ select { cursor: pointer; padding-right: 14px; }
 // ════════════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════════════
-const N8N_WEBHOOK = 'https://gringoportal.app.n8n.cloud/webhook/chirurg-assistant';
+// ═══ 4 SEPARATE WEBHOOKS (no Switch) ═══
+const WEBHOOKS = {
+  document:  'https://gringoportal.app.n8n.cloud/webhook/chirurg-document',
+  epikryza:  'https://gringoportal.app.n8n.cloud/webhook/chirurg-epikryza',
+  icd:       'https://gringoportal.app.n8n.cloud/webhook/chirurg-icd',
+  history:   'https://gringoportal.app.n8n.cloud/webhook/chirurg-history'
+};
+// Legacy alias for any remaining references
+const N8N_WEBHOOK = WEBHOOKS.document;
 const DOCTOR = 'Grynko Roman (nr prawa: 4030783)';
 let currentTab = 'przyjecie';
 let voiceLang = 'pl-PL';
@@ -1876,7 +1883,7 @@ async function aiICD(diagId, codeId) {
   if (!val || val.length < 3) { showToast('Wpisz rozpoznanie','error'); return; }
   showLoader('Szukam kodu ICD-10...');
   try {
-    const r = await fetch(N8N_WEBHOOK, {
+    const r = await fetch(WEBHOOKS.icd, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({action:'get_icd_code', diagnosis:val}),
       signal: abortAfter(30000)
@@ -2052,7 +2059,7 @@ async function generate() {
   document.getElementById('loaderHumor').textContent = HUMOR[Math.floor(Math.random()*HUMOR.length)];
 
   try {
-    const r = await fetch(N8N_WEBHOOK, {
+    const r = await fetch(WEBHOOKS.document, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         action:'generate_document', tab:currentTab,
@@ -2187,13 +2194,17 @@ function closeHistory() {
 }
 async function loadHistory() {
   try {
-    const r = await fetch(N8N_WEBHOOK, {
+    const r = await fetch(WEBHOOKS.history, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({action:'get_history'})
+      body: JSON.stringify({action:'get_history'}),
+      signal: abortAfter(15000)
     });
     const res = await r.json();
     if (res.success) {
       historyData = res.history || [];
+      renderHistory();
+    } else {
+      showToast('Brak danych historii','info');
       renderHistory();
     }
   } catch(e) { showToast('Błąd ładowania historii','error'); }
